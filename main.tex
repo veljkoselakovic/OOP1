@@ -1,0 +1,1837 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,serbian]{babel}
+\usepackage[fleqn]{mathtools}
+\usepackage{marginnote}
+\usepackage{tikz}
+\usepackage{relsize}
+\usepackage{enumitem}
+\usepackage{wasysym}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{color}
+\usepackage[none]{hyphenat}
+\usepackage[bottom = 0.5in]{geometry}
+\usepackage{changepage}
+
+% Definisanje lstset za formatiran kod
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstset{frame=tb,
+  language=C++,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+%Definisanje okoline za naslove sa vecim znacenjem - jako debilno
+\newenvironment{xitemize}{%
+    
+    \itemize
+    \larger
+}{%
+    \enditemize
+}
+\let\olditemize\itemize
+\let\endolditemize\enditemize
+\renewenvironment{itemize}{%
+    \smaller
+    \olditemize
+}{%
+    \endolditemize
+}
+% Kod za definisanje checkmarka
+\def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;} 
+% Kod za definisanje inline koda
+\providecommand{\inlinecode}[1]{\texttt{#1}}
+% Kod za komandu koja uokviri tekst i na margini napise dodatnu informaciju u formatu \boxedimportant[info]{text}
+\providecommand{\boxedimportant}[2][]{\noindent\fbox{%
+            \parbox{\linewidth}{%
+            #2            }%
+                        \marginnote{#1}
+
+            }
+}
+\addtolength{\topmargin}{-.875in}
+
+\title{OOP1\\\large Objektno-orijenitsano programiranje 1}
+\author{Veljko Selaković }
+\date{prof. dr Igor Tartalja\\ prof. dr Dragan Milićev}
+
+
+\begin{document}
+
+\maketitle
+Ako nadjete greske recite mi odmah da ispravim
+Nebitno da li su slovne ili sam nesto pogresno lupio. Mozete i sami izmeniti na https://github.com/veljkoselakovic/OOP1-skripta i napraviti pull request
+\newpage
+
+\begin{itemize}
+    \item \textbf{UML} - \textit{Unified Modeling Language} (Kasnije predmet \textit{Projektovanje softvera}, 5. semestar)
+\end{itemize}
+\section{Osnovni ciljevi OOP}
+\begin{xitemize}
+    \item Problem korišćenja postojećeg koda
+    \begin{itemize}
+        \item \textbf{Biblioteka funkcija} - skupo održavanje, otklanjanje grešaka i proširivanje sistema
+    \end{itemize}
+    \item Evolucija programskih jezika
+    \begin{enumerate}
+        \item Apstrakcija izraza  $\sim$1950. - \textbf{FORTRAN}
+        \begin{itemize}
+            \item Registri skriveni
+        \end{itemize}
+        \item Apstrakcija kontrole $\sim$1960. - \textbf{Algol60}
+        \begin{itemize}
+            \item Tok kontrole programa - \textit{petlje}
+        \end{itemize}
+        \item Apstrakcija podataka  $\sim$1970. - \textbf{Pascal}
+        \begin{itemize}
+            \item Razdvajanje detalja prezentacije podataka od apstraktnih operacija koje se definišu nad podacima - npr. \textit{tipovi nabrajanja}
+        \end{itemize}
+    \end{enumerate}
+    \item Dodatni koncepti
+    \begin{enumerate}
+        \item Zasebno prevođenje modula - \textbf{FORTRAN, C, Ada}
+        \item Razdvajanje interfejsa od implementacije - \textbf{Ada}
+        \item Koncept klase - \textbf{Simula67}
+    \end{enumerate}
+    \item 4 Osnovna principa OOP
+    \begin{itemize}
+        \item Apstrakcija
+        \item (En)kapsulacija
+        \item \underline{Nasleđivanje}
+        \item Polimorfizam
+    \end{itemize}
+\end{xitemize}
+\section{C++}
+\begin{xitemize}
+    \item Razvoj C++
+    \begin{itemize}
+        \item  C $\rightarrow$ C sa klasama $\rightarrow$ C++
+        \item Svake 3 godine novi standard
+        \item ISO 98 $\rightarrow$ ISO 03 $\rightarrow$ ISO 11 $\rightarrow$ ISO 14 $\rightarrow$ISO 17 $\rightarrow$ ISO 20 \textit{(još nije standardizovano)}
+        \item Spontani razvoj, za razliku od \textbf{Ade}
+    \end{itemize}
+    
+    \item Aspekti C++
+    \begin{enumerate}
+        \item Da bude dovoljno \underline{blizak mašini}
+        \begin{itemize}
+            \item C++ je \textit{nadskup} u velikoj većini slučajeva
+        \end{itemize}
+        \item Da bude dovoljno \underline{blizak problemu}
+        \begin{itemize}
+            \item Klase iz \textbf{Simula67}
+            \item Preklapanje operatora iz Algola
+        \end{itemize}
+    \end{enumerate}
+\end{xitemize}
+\newpage
+\section{Pregled gradiva koje će se raditi}
+\begin{xitemize}
+    \item Klase i objekti
+    \begin{itemize}
+        \item Klase su apstrakcije zajedničkih atributa i zajedničkog ponašanja jednog skupa srodnih objekata
+        \item Klasa sadrži
+        \begin{enumerate}
+            \item Podatke članove \textit{(atribut ili polje)}
+            \item Funkcije članove \textit{(metodi)}
+        \end{enumerate}
+        \item Pristupačnost određenim članovima deklariše programer
+        \item \textbf{Implementaciju} klase čine $\longleftarrow$ \textit{Kako radi?}
+        \begin{enumerate}
+            \item Privatni podaci članovi
+            \item Definicije funkcija
+        \end{enumerate}
+        \item \textbf{Interfejs} klase čine $\longleftarrow$ \textit{Šta radi?}
+        \begin{enumerate}
+            \item Javni podaci članovi
+            \item Deklaracije javnih funkcija 
+        \end{enumerate}
+
+        \item Instanca klase $\rightarrow$ objekat $\begin{cases}
+        \textbf{Stanje}\\
+        \textbf{Ponašanje}\\
+        \textbf{Identitet}
+        \end{cases}$
+    \end{itemize}
+    \item Konstruktori i destruktori
+    \begin{itemize}
+        \item Prilikom kreiranja i uništavanja objekta
+        \item Nemaju \inlinecode{return} tip
+        \item Automatsko izvršavanje prilikom kreiranja/uništavanja objekta
+    \end{itemize}
+    \item Izvođenje i nasleđivanje
+    \begin{itemize}
+        \item Iz opštije klase izvodimo specifične klase
+        \item Izvedene klase nasleđuju atribute i metode osnovne klase, i dodaju nove
+        \item Objekti izvedene klase su i indirektne instance osnovne klase
+        \item U izrazima izvedeni objekti mogu zameniti osnovnu klasu - \textit{Liskov substitution principle}
+        \item Nasleđeni metodi se mogu redefinisati
+    \end{itemize}
+    \item Polimorfizam
+    \begin{itemize}
+        \item Ako se funkcija proglasi \inlinecode virtual na nju se primeni \textbf{\underline{dinamičko vezivanje}}
+        \item \textbf{\underline{Dinamičko vezivanje}} - Adresa se ne određuje u vreme povezivanja, poziv se vezuje za funkciju u vreme izvršenja
+        \item Ponašanje objekta ne zavisi samo od tipa pokazivača, već i od tipa pokazanog objekta
+    \end{itemize}
+    
+    \item Klasifikacija objektnih jezika
+    \begin{enumerate}
+        \item Objektno-bazirani
+       \begin{itemize}
+           \item Apstrakcija, (en)kapsulacija, modularnost\\ \textbf{Ada83, Visual Basic 6}
+       \end{itemize} 
+       \item Objektno-orijentisani
+       \begin{itemize}
+           \item Princip nasleđivanja\\
+           \textbf{Simula, Smalltalk, Ada95, C++, Java, VB.Net, C\#}
+       \end{itemize}
+    \end{enumerate}
+    \item Obrada izuztenih situacija
+    \begin{itemize}
+        \item Nepostojeće datoteke, prekoračenje opsega indeksa,...
+        \item Tradicionalni jezici u funkciji vraćaju vrednost koja signalizira grešku, koja se naknadno analizira
+        \item Kod postane nepregledan
+        \item   \inlinecode{try/catch/throw} ključne reči
+    \end{itemize}
+    \item Šabloni \textit{(Templates)}
+    \begin{itemize}
+        \item Određene obrade ne zavise od tipa podataka
+        \item \textit{Generičko programiranje}
+        \item Statički mehanizam - \textit{u prevodu se zameni}
+    \end{itemize}
+    \item Preklapanje operatora
+    \begin{itemize}
+        \item Sam koncept nije OO, ali se dobro uklapa
+        \item Redefinicija standardnih jezičkih operatora
+        \\   \inlinecode{operator<simbol>}
+        \item Ne mogu se preklopiti svi operatori, a za neke važe posebna pravila
+    \end{itemize}
+\end{xitemize}
+
+\section{Proširenja jezika C}
+\begin{xitemize}
+
+    \item Deklaracija vs definicija
+    \begin{multicols}{2}
+    \begin{itemize}
+    
+        \item Deklaracija je iskaz koji
+        \begin{enumerate}
+            \item Uvodi ime u program
+            \item Govori prevodiocu kojoj jezičkoj kategoriji pripada ime
+        \end{enumerate}
+        \item Definicija
+        \begin{enumerate}
+            \item Kreira objekat ILI
+            \item Navodi telo funkcije ILI
+            \item U potpunosti navodi strukturu korisničkog tipa
+        \end{enumerate}
+        
+    
+    \end{itemize}
+    \columnbreak
+    \begin{lstlisting}
+    void f(int x, float y);       // Deklaracija
+    void f(int x, float y) {...} // Definicija
+    extern int x; // Deklaracija
+    int x; //Definicija
+    class X; //Deklaracija
+    class X { ... }; //Definicija
+    \end{lstlisting}
+    \end{multicols}
+    \begin{itemize}
+        \item Samo jedna definicija, a proizvoljno mnogo deklaracija
+        \item Objekat može biti definisan i deklarisan u istom redu
+    \end{itemize}
+    \item Objekti
+    \begin{itemize}
+        \item Objekat u širem smislu - \textbf{podatak}
+        \item Objekat u užem smislu - \textbf{instanca klase}
+        \item Objekat ima 
+        \begin{enumerate}
+            \item Stanje
+            \item Ponašanje
+            \item Identitet $\rightarrow$ primitivni podaci nemaju identitet
+        \end{enumerate}
+        \item \textbf{Promenljiva} je lokacija u kojoj se čuva podatak
+        \item Podela promenljivih
+        \begin{enumerate}
+            \item Statička
+            \item Automatska
+            \item Dinamička
+            \item Privremena \textit{(tranzijentna)}
+        \end{enumerate}
+    \end{itemize}
+    \begin{multicols}{2}
+    \item Lvrednosti \textit{(LVALUE)}
+    \begin{itemize}
+        \item Izraz koji upućuje na objekat ili funkciju
+        \item Operatori čiji operandi moraju biti LVAL \\
+        \textbf{unarni  \inlinecode{\&, ++, --,} levi operandi svih operatora dodele}
+        \item Operatori čiji su rezltati LVAL\\
+        \textbf{unarni   \inlinecode{*, [],} prefiksni   \inlinecode{++} i   \inlinecode{ --,} operatori dodele}
+        \item DVrednost je sve što nije LVrednost \textit{(RVALUE)}
+    \end{itemize}
+    \columnbreak
+    \begin{lstlisting}
+    int *q[100]; 
+    q[10]=&i;  //q[10] je lvrednost
+    *q[10]=1; // *q[10] je lvrednost 
+    q = &i; // ERROR, ime niza nije vrednost
+    int a=1, b=2, c=3;
+    (a=b)=c; // OK
+    (a+b)=c; // ERROR
+    ++ ++i; // OK
+    i++ ++; // ERROR
+    \end{lstlisting}
+    \end{multicols}
+
+
+\newpage
+    \item Oblast važenja
+    \textit{(Scope)}
+    \begin{itemize}
+        \item Onaj deo teksta programa u kome se deklarisano ime može koristiti
+        \item \textbf{\underline{Dinamičko vezivanje}} imena $\rightarrow$ od mesta deklaracije do kraja datoteke (globalna imena)
+        \item \textbf{Lokalna} imena $\rightarrow$ od mesta deklarisanja do kraja odgovarajućeg bloka
+        \item Sakrivanje imena 
+        \begin{enumerate}
+            \item  Ako se definiše u nekom bloku, globalno je skriveno
+            \item \boxedimportant[BITNO]{Ako se redefiniše u unutrašnjem bloku, ime iz spoljašnjeg bloka je sakriveno do izlaska iz bloka}
+        \end{enumerate}
+        \item Pristup globalnom imeu koristeći operator  \inlinecode{::}
+    \end{itemize}
+    \begin{lstlisting}
+    int x = 0; // Globalno x
+    void f() {
+        int y=x, x; // y dobija vrednost globalnog x
+        x=1; // Lokalno x
+        ::x=5; // Globalno x
+        {
+            int x; // Novo lokalno x, sakriva prethodno
+            x=2;
+        }
+        x=3; // Pristup prvom lokalnom
+    }
+    int *p = &x; // Globalno x
+    \end{lstlisting}
+
+
+    \item Specifični dosezi
+    \begin{itemize}
+        \item Oblast važenja funkcije imaju samo labele
+        \item  \inlinecode{for} petlja
+        \item Ranije verzije kompajlera su imale doseg promenljivih koji je bio 1 blok \textbf{van} (  \inlinecode{for} (MS VC++.6)
+        \item U  \inlinecode{if} doseg do kraja  \inlinecode{else}
+    \end{itemize}
+    \item Klasni/Strukturni doseg
+    \begin{itemize}
+        \item Oblast važenja imaju svi njeni članovi
+        \begin{enumerate}
+            \item  \inlinecode{.} $\rightarrow$ levi operand objekat
+            \item   \inlinecode{->} $\rightarrow$ levi operand pokazivač na objekat
+            \item  \inlinecode{::} $\rightarrow $ levi operand ime klase
+        \end{enumerate}
+    \end{itemize}
+    \item Životni vek objekata
+    \begin{itemize}
+        \item Vreme u toku izvršavanja programa u kojem objekat postoji i za koje mu se može pristupati
+        \item Vek atributa klase = vek objekta
+        \item Vek parametra = vek automatskog objekta
+        \begin{enumerate}
+            \item Statički objekti
+            \item Automatski objekti
+            \item Dinamički objekti
+            \item Privremeni \textit{(tranzijentni)} objekat
+        \end{enumerate}
+    \end{itemize}
+    \item Statički i automatski objekti
+    \begin{itemize}
+        \item Automatski objekat je lokalni objekat koji nije definisan kao \textit{static}
+        \begin{enumerate}
+            \item \textbf{Životni vek} - od definicije do kraja oblasti važenja
+            \item Svaki put se kreira iznova prilikom poziva bloka u kom je definisan
+            \item Prostor se alocira na \textit{stack}
+        \end{enumerate}
+        \item Statički objekat je globalni objekat ili lokalni deklarisan kao \textit{static}\\\\
+        Globalni 
+        $\begin{cases}
+        $1. \textbf{Životni vek} - od definicije do kraja izvršenja \textit{main}$\\
+        $2. Kreiraju se jednom, na početku izvršavanja, pre funkcija objekta$\\
+        \end{cases}$\\
+        Lokalni\hspace{0.26cm}$\begin{cases}
+        $3. Počinju da žive pri prvom nailasku na njih$
+        \end{cases}$
+    \end{itemize}
+    \newpage
+    \item Dinamički i privremeni objekti
+    \begin{itemize}
+        \item Dinamički objekti se kreiraju i uništavaju posebnim operacijama
+        \begin{enumerate}
+            \item \textbf{Životni vek} - kontroliše programer
+            \item   \inlinecode{new/delete}
+            \item Prostor alocira na \textit{heap}
+        \end{enumerate}
+        \item Privremeni objekti se kreiraju pri izračunavanju izraza
+        \begin{enumerate}
+            \item \textbf{Životni vek} - kratak i nedefinisan
+            \item Odlaganje međurezultata i privremeno smeštanja vraćenih vrednosti funkcije
+            \item Najčešće se uništavaju čim nisu potrebni
+        \end{enumerate}
+    \end{itemize}
+
+
+    \item Leksički elementi
+    \begin{itemize}
+        \item Komentari
+        \begin{enumerate}
+            \item \inlinecode{$//...$}
+            \item \inlinecode{$/*...*/$}
+        \end{enumerate}
+        \item 73 ključne reči + alternative
+        \item C++11 \inlinecode{bool}, C11:  \inlinecode{\_Bool}
+        \item Specijalne (ali ne i rezervisane) reči: \inlinecode{final} i  \inlinecode{override} \textit{(Backwards compatibility)}
+        \item Ne treba započinjati imena donjom crtom
+    \end{itemize}
+
+\item Tipizacija
+\begin{itemize}
+    \item \textbf{Stroga tipizacija} - objekti različitih tipova se ne mogu proizvoljno zamenjivati
+    \item C++ je hibridan
+    \begin{enumerate}
+        \item Za osnovne primitivne tipove \checkmark{}
+        \item Za sve ostalo X
+    \end{enumerate}
+\end{itemize}
+\item Konverzija
+\begin{itemize}
+    \item Operatori zahtevaju određene tipove operanada
+    \item Naredbe zahtevaju određene tipove operanada \\
+    \inlinecode{for, if, while...}
+\end{itemize}
+\item Vrste konverzija tipova
+\begin{itemize}
+    \item \textbf{Standarna konverzija} - ugrađeno u jezik\\
+    npr. \inlinecode int $\rightarrow $ \inlinecode float, \inlinecode char $\rightarrow$ \inlinecode int
+    \item \textbf{Korisnička konverzija} - definiše programer
+    \item Pored toga, konverzija može biti
+    \begin{enumerate}
+        \item \textbf{Implicitna} - prevodilac je automatski vrši
+        \item \textbf{Eksplicitna} - zahteva programer
+    \end{enumerate}
+    \item C koristi \textit{cast} operator \\
+    \inlinecode{(tip)izraz}
+    \item C++ uvodi 4 specifčna \textit{cast} operatora
+    \item Postoji i konverzioni konstruktor
+\end{itemize}
+\item Priduživanje imena tipu
+\begin{multicols}{2}
+
+\begin{itemize}
+    \item C-stil\\
+    \inlinecode{typedef opis\_tipa = ime\_tipa}
+    \item C++ stil, čitljivije\\
+    \inlinecode{using ime\_tipa = opis\_tipa}
+\end{itemize}
+\columnbreak
+    \begin{lstlisting}
+typedef unsigned long long int Ceo1;
+using Ceo2 = unsigned long long int; 
+    \end{lstlisting}
+\end{multicols}
+\begin{multicols}{2}
+
+\item Određivanje tipa izrazom\newline
+\inlinecode{decltype (izraz) promenljiva [= vrednost]}
+\begin{itemize}
+    \item Izraz se \textbf{ne} izračunava
+    \item Primena kod \textit{template-ova}
+\end{itemize}
+\columnbreak
+\begin{lstlisting}
+int x=1; double y=2.3;
+decltype(x) a = x; // a je int
+decltype(y) b = y; // b je float
+decltype(a++) c = a; // c == a == 1
+\end{lstlisting}
+\end{multicols}
+\item Automatsko određivanje tipa
+\begin{itemize}
+    \item \inlinecode{auto} ključna reč određuje tip na osnovu inicijalne vrednost 
+    \inlinecode U C, \inlinecode{auto} označava automatsku lokalnu promenljivu, i ne piše se
+    
+    \begin{lstlisting}
+auto int a = 10; // Samo u C
+auto a = 10; // C++, a je int
+\end{lstlisting}
+\end{itemize}
+
+\item Odloženo navođenje tipa funkcije\\
+\inlinecode{auto ime\_funkcije(parametri) -> tip}
+\begin{itemize}
+    \item Koristi se kod \textit{template-ova}
+    \item C++14 \inlinecode{tip} može da se izostavi
+    \begin{enumerate}
+        \item U tom slučaju tip se odredi preko \inlinecode{return} tipa ili definicije
+        \item Funkcija ne sme da se poziva pre navođenja definicija na mestima gde je tip bitan
+    \end{enumerate}
+    \begin{lstlisting}
+auto func(int x) -> double { ... } // return tip je double
+auto f() { return 1; }
+auto g();
+auto a = g(); // ERROR
+auto g() { return 0.5}
+auto b = g() // OK
+    \end{lstlisting}
+\end{itemize}
+\item Konstante
+\begin{itemize}
+    \item Izvedeni tip\\
+    \inlinecode{const tip ime = vrednost;}
+    \item Mora da se inicijalizuje pri definisanju
+    \item Izraz ne morada bude konstantan
+    \item \boxedimportant[BITNO]{Konstante inicijalizovane \textbf{konstantnim} izrazom
+    (\textit{simboličke} ili \textit{kompilacione} konstante) mogu da se koriste u izrazima koji moraju biti konstantni (računaju se \textbf{u toku} prevođenja)\\
+    npr. Dimenzija statičkog niza}
+    
+    \item \textbf{Simboličke }konstante NE alociraju memoriju
+    \\\\
+    \inlinecode{const char* pk = niz;} $\longleftarrow$ pokazivač na konstantu\\
+    \inlinecode{char* const kp = niz;} $\longleftarrow$ konstantni pokazivač
+    \item Ubacivanje \inlinecode{const} u parametre funkcije obezbeđuje da se dati objekat ne menja
+    \item Ubacivanje \inlinecode{const} u \inlinecode{return} tipu funkcije obezbeđuje da se privremeni objekat rezultata ne može menjati
+    \item POGLEDATI \inlinecode{constexpr}
+    \begin{lstlisting}
+char niz[] = { 'i', 'd', 'e', ' ', 'g', 'a', 's', '\0' };
+const char* pk = niz; // Pokazivac na konstantu
+pk[3] = '-';            // ERROR
+pk = "OOP:(";          // OK
+char* const pk = niz    // Konstantni pokazivac
+pk[3] = '-';            // OK
+pk = "OOP:(";          // ERROR
+    \end{lstlisting}
+\end{itemize}
+\item Znakovne konstante
+\begin{itemize}
+    \item U C $\rightarrow$ \inlinecode int (\inlinecode 65 i \inlinecode 'A' su ista stvar)
+    \item U C++ $\rightarrow$ \inlinecode char
+    \item U izrazima \inlinecode{false} $\rightarrow$ 0, a u dodeli vrednosti logičkim promenljivama 0 $\rightarrow$ \inlinecode{false}
+\end{itemize}
+\newpage
+
+\item Prostori imena (\inlinecode{namespace})
+\begin{itemize}
+    \item Mehanizam za izbegavanje konflikata imena\\
+    \inlinecode{namespace ID \{ sadržaj \}}
+    \item Jednoznačno ime
+    \begin{enumerate}
+        \item Celo ime \inlinecode{A::i}
+        \item Uvoz imena \inlinecode{using A::i}
+        \item Uvoz svih imena \inlinecode{using namespace A}
+    \end{enumerate}
+\end{itemize}
+\item Stringovi
+\begin{itemize}
+    \item C stil - niz znakova koji se završava sa \inlinecode{$\backslash$0}
+    \item Literal C++ stringa je \inlinecode{const char*}
+    \item Literal C stringa je \inlinecode{char*}
+    \item C++ - podrazumevani string je \inlinecode{""}
+\end{itemize}
+\item Tipovi \inlinecode{enum}, \inlinecode{struct} i \inlinecode{union}
+\begin{itemize}
+    \item Identifikatori ova 3 tipa mogu da se koriste kao oznaka tipa, bez ključne reči
+    \item Ako u dosegu postoji objekat sa istim identifikatorom, sam ID označava objekat, a ne tip
+    \begin{lstlisting}
+enum RadniDan {Pon, Uto, Sre, Cet, Pet};
+RadniDan r_dan = Uto;
+int RadniDan;
+enum RadniDan r1 = Sre; // OK
+RadniDan r1 = Pon;        // ERROR
+    \end{lstlisting}
+\end{itemize}
+
+
+\item Tip nabrajanja (\inlinecode{enum})
+\begin{itemize}
+    \item Svaki \inlinecode{enum} je poseban celobrojni tip
+    \item Definisana je samo operacija dodele vrednosti
+    \begin{enumerate}
+        \item \boxedimportant[BITNO]{Eksplicitna konverzija celobrojne vrednosti u tip nabrajanja je obavezna}
+        \item Ne otkriva se greška ako konvertovana vrednost nije u opsegu 
+    \end{enumerate}
+    \item U aritmetičkim i relacijskim izrazima, kao i pri dodeli promenljivoj tipa int, konverzija je automatska
+    \begin{lstlisting}
+enum Dani {PO=1, UT, SR, CE, PE, SU, NE, POSLEDNJI=7}; // NE i POSLEDNJI su 7
+Dani dan=SR; // OK
+Dani d=4; // ERROR - nije eksplicitna konverzija
+dan++; // ERROR - nije definisana operacija ++
+dan=(Dani)(dan+1); // OK
+if (dan<NE) { ... } // OK
+dan=(Dani)8; // Ne prijavljuje se logicka greska
+    \end{lstlisting}
+\end{itemize}
+\item Pripadajući tip nabrajanja
+\begin{itemize}
+    \item Numerička reprezentacija nabrajanja
+    \item Kompaktnije, podrazumeva se int\\
+    \inlinecode{enum ime: pripadajući\_tip \{imenovane\_konstante\}}
+    \item Paziti opsege
+\end{itemize}
+\begin{multicols}{2}
+\item Nabrajanja sa ograničenim dosegom
+\begin{itemize}
+    \item Isti doseg kao i tip nabrajanja
+    \item Rešenje - \inlinecode{struct} ili \inlinecode{class} iza \inlinecode{enum} 
+    \item Pristup konstanti sa \inlinecode{::}
+    \item Obavezna eksplicitna konverzija u ceo broj\\
+    \inlinecode{int i = (int)tip::ime}
+\end{itemize}
+\columnbreak
+\begin{lstlisting}
+enum SemaforPesaci {CRVENO, ZELENO};
+enum SemaforVozila {ZELENO, ZUTO, CRVENO}; // ERROR
+enum struct SemaforPesaci {CRVENO, ZELENO};
+enum struct SemaforVozila {ZELENO, ZUTO, CRVENO};
+SemaforPesaci sp = SemaforPesaci::CRVENO;
+SemaforVozila sv = ZUTO; // ERROR
+int i = (int) SemaforVozila::ZELENO; // Obavezna konverzija
+\end{lstlisting}
+\end{multicols}
+\item Inicijalizatorske liste\\
+\inlinecode{\{vrednost, vrednost, ..., vrednost\}}
+\begin{itemize}
+    \item Inicijalizacija \textbf{svih} vrsta podataka, čak i prostih
+    \item Paziti na nebezbedne konverzije
+    \item Vrednosti se dodeljuju redom (čak i strukturama, uniji se popuni prvo polje)
+    \item Manjak vrednosti $\rightarrow$ popunjava se nulama
+    \item Višak vrednosti $\rightarrow$ Greška
+    \item Argumenti funkcija i izrazi u \inlinecode{return} mogu biti ove liste
+    \item Bezimeni podatak
+    \item \boxedimportant[ČUDNO]{Niz ne može da dobije vrednost liste nakon inicijalizacije, sem ako je deo neke strukture}
+    \begin{lstlisting}
+int i1={1}, i2{1}, i3={i1+i2};
+i1={2};
+int i4={0.5}; // ERROR - nije bezbedno
+int *pi={&i1};
+int n1[5]={1,2,3}, n2[5]{1,2,3}, n3[]{1,2,3};
+int m[][3]{{1,2},{},{1,2,3}};
+n1={4,5,6}; // ERROR
+struct S1{int a,b;};
+S1 s11={1,2}, s12{1,2}; s11={3,4};
+struct S2{int a; S1 b; int c[3];};
+S2 s21={1,{2,3}, {4,5,6}}, s22{1,2,3,4,5,6};
+s21 = {6, {5,4}, {3,2,1}}; 
+    \end{lstlisting}
+\end{itemize}
+\item Bezimena unija
+\begin{itemize}
+    \item Predstavlja objekat koji sadrži u raznim trenucima razne tipove podataka
+    \item Datotečki ili blokovski doseg
+    \item Unija za koju je definisan barem 1 objekat ili pokazivač $\rightarrow$ nije bezimena unija, iako nema ime
+    \begin{lstlisting}
+union{ int i; double d; char *pc; };
+i=55; d=123.456; pc="ABC";
+    \end{lstlisting}
+\end{itemize}
+
+\item Uvek promenljiva polja (\inlinecode{mutable})
+\begin{itemize}
+    \item Polje označeno sa \inlinecode {mutable} može da se menja čak i za \inlinecode {const} parametre
+    \begin{lstlisting}
+struct X{
+    int a;
+    mutable int b;
+};
+int main(){
+    X x1;
+    const X x2;
+    x1.a = 4;
+    x1.b = 2;
+    x2.a = 3; // ERROR
+    x2/b = 4; // OK
+}
+    \end{lstlisting}
+\end{itemize}
+
+\newpage
+\item Dinamički objekti
+\begin{itemize}
+    \item \inlinecode {new/delete}
+    \item Operand operatora \inlinecode {new} je identifikator tipa \inlinecode T sa eventualnim inicijalizatorima
+    \begin{enumerate}
+        \item Alocira potreban prostor za objekat datog tipa
+        \item Poziva konstruktor tipa
+    \end{enumerate}
+    \item Ako nema mesta \inlinecode {bad\_alloc} exception\\
+    U nestandardizovanom C++ vraća se \inlinecode {nullptr}
+    \item Vraća pokazivač na kreirani objekat\\
+    \inlinecode{T *t = new (nothrow)T;} $\longleftarrow$ Ignorisanje exceptiona, vraća \inlinecode{nullptr} ako ne uspe
+    \item Stavlja na \textit{heap}
+\end{itemize}
+\item Uništavanje dinamičkih objekata
+\begin{itemize}
+    \item \inlinecode {delete} ima 1 operand (pokazivač nekog tipa)
+    \item Mora biti objekat kreiran pomoću \inlinecode {new}, inače će ponašanje biti nepredviđeno
+    \item  \inlinecode{delete nullptr} ne radi ništa
+    \begin{enumerate}
+        \item Poziva destruktor za pokazani objekat
+        \item Oslobađa zauzeti prostor
+    \end{enumerate}
+    \item \inlinecode {delete} vraća \inlinecode {void}
+\end{itemize}
+\item Dinamički nizovi
+\begin{itemize}
+    \item Sve dimenzije niza osim prve moraju biti konstanti izrazi
+    \item Inicijalizacija
+    \begin{enumerate}
+        \item Podrazumevani konstruktor ILI
+        \item Generisain konstruktor
+    \end{enumerate}
+    \inlinecode{delete [] pt;}
+    \item Redosled konstrukcije po rastućem indeksu
+    \item Redosled destrukcije obrnut od redosleda konstrukcije
+    \item Može inicijalizatorska lista
+\end{itemize}
+
+
+\item Reference
+\begin{itemize}
+    \item C isključivo po vrednosti prenosi argumente
+    \item C++ prenosi argumente i po referenci
+    \begin{lstlisting}
+void f(int i, int &j){ // i po vrednosti, j po referenci
+    i++; // stvarni argument se nece promeniti
+    j++; // stvarni argument ce se promeniti
+}
+int main () {
+    int si=0,sj=0;
+    f(si,sj);
+    cout<<"si="<<si<<", sj="<<sj<<endl;
+}
+Izlaz: si=0, sj=1
+    \end{lstlisting}
+\end{itemize}
+\item Definisanje referenci
+\begin{itemize}
+    \item Reference na LVrednosti (\inlinecode {lvalue})
+    \item Znak \inlinecode\& ispred imena
+    \item Sinonim za objekat, ne može se promeniti
+    \item U definiciji mora da se inicijalizuje objektom
+    \item Svaka naredba nad referencom je operacija nad pokazanim objektom
+    \begin{lstlisting}
+int i=1; // celobrojni objekat i
+int &j=i; // j upucuje na i
+i=3; // menja se i
+j=5; // opet se menja i
+int *p=&j; // isto sto i &i
+j+=1; // isto sto i i+=1
+int k=j; // posredan pristup do i preko reference
+int m=*p; // posredan pristup do i preko pokazivaca
+    \end{lstlisting}
+\end{itemize}
+
+
+\item Implementacija referenci
+\begin{itemize}
+    \item Slično konstanom pokazivaču\\
+    \inlinecode{int \&j = *new int(2);}\\
+    \inlinecode{delete \&j;}
+    \item Ako je referenca na \inlinecode {const} objekat, ne sme se menjati 
+    \item Ne postoje nizovi referenci, pokazivači na referencu, kao ni reference na reference
+    \item Referenca na pokazivač je dozvoljena
+\end{itemize}
+
+
+\item Funkcije koje vraćaju reference
+\begin{itemize}
+    \item Funkcija mora da vrati referencu na objekat koji je \textit{živ} i posle funkcije
+    \item Rezultat poziva funkcija je LVrednost (\inlinecode {lvalue}) samo kao funkcija vraća referencu
+    \begin{lstlisting}
+int& f(int &i) { int &r = *new int(i); return r; } // OK
+int& f(int &i) { return *new int(i); } // OK
+int& f(int &i) { return i; } // OK
+int& f(int &i) { int r = i; return r;} // NIJE OK
+int& f(int i) { return i; } // NIJE OK
+int& f(int &i) { int r = *new int(i); return r; } // NIJE OK
+int& f(int &i) { int j = i; &r = j; return r; } // NIJE OK
+    \end{lstlisting}
+\end{itemize}
+\item Obilazak elemenata niza u petlji\\
+\inlinecode{for(tip ime: niz) naredba}
+\begin{itemize}
+\item \textbf{foreach}, range petlja
+\item Može se staviti referenca na objekat, čime omogućavamo menjanje svakog elementa kom pristupamo - bez njega su \textit{read-only}
+\begin{lstlisting}
+for(auto& it: arr){ // it od iterator
+    cout<<it++<<endl;
+}
+\end{lstlisting}
+
+\end{itemize}
+\begin{multicols}{2}
+\item Reference na DVrednosti (\inlinecode {rvalue})
+\begin{itemize}
+    \item Tip reference na DVrednost\\
+    \inlinecode{osnovni\_tip \&\& ime = vrednost;}
+    \item Referenca na DVrednost je LVrednost
+    \item Posledica - privremeni podaci dobijaju imena, pa možemo da ih menjamo
+    \item Podatak može biti nepromenljiv
+\end{itemize}
+\columnbreak
+\begin{lstlisting}
+int i=1; // i je promenljiv podatak
+const int ci=i; // ci je nepromenljiv podatak
+int && rd1=i; // ERROR - i je promenljiva lvrednost
+int && rd2=ci; // ERROR - ci je nepromenljiva lvrednost
+int && rd3=i+1; // (i+1) je promenljiva dvrednost
+int && rd4=10; // 10 je nepromenljiva dvrednost 
+rd3++; rd4++; // rd3==3, rd4==11 
+\end{lstlisting}
+\end{multicols}
+\item Reference na DVrednosti kao parametri
+\begin{itemize}
+    \item Ne postoji \textit{bočni efekat}
+    \item \inlinecode {const} nema smisla
+\end{itemize}
+\item Podrazumevane vrednosti argumenata
+\begin{itemize}
+    \item Može biti samo nekoliko poslednjih argumenata
+    \item Proizvoljni izrazi
+\end{itemize}
+\newpage
+
+\item Neposredno ugrađivanje funkcije u kod
+\begin{itemize}
+    \item Jednostavne, kratke funkcije\\
+    \inlinecode{inline tip ime( parametri ) \{ definicija }\}
+    \item Izbegavanje prenosa argumenata i poziva funkcija
+    \item Funkcija članica klase je \inlinecode {inline} ako se definiše u definiciji klase
+    \item Ako se definiše van definicije klase, mora se staviti ključna reč
+    \item Prevodilac ne mora da poštuje \inlinecode {inline}
+    \item Ako je u više datoteka, mora se definisati u svakoj
+    \item Često rešenje je sprovođenje sa dodatnom datotekom-zaglavljem, ali se tad funkcija može direktno videti od strane drugih korisnika
+    \item Eliminiše potrebu za makroima
+    \begin{lstlisting}
+#define max(i,j)((i)>(j))?(i):(j)
+max(i++, k++);
+((i++)>(j++))?(i++):(j++); // 2x se inkrementira
+    \end{lstlisting}
+\end{itemize}
+
+\item Preklapanje imena funkcija
+\begin{itemize}
+    \item \textit{Function name overloading}
+    \item Funkcije koje realizuju logički istu operaciju, sa različitim tipovima argumenata
+    \item U C nema preklapanja - funkcije moraju imati različita imena
+    \item Mora da se razlikuje broj i/ili tip argumenata
+    \item Tip rezultata \textbf{ne mora} da se razlikuje
+    \item Takođe, \textbf{nije dovoljno} da se razlikuje samo \inlinecode{return} tip
+    \item Statički koncept, sve se odvija u prevođenju
+    \item Prevodilac prioritira slaganje tipova
+    \begin{enumerate}
+        \item Potpuno slaganje - uključuje niz $\rightarrow$ pokazivač, ili referenca $\rightarrow$ objekat
+        \item Slaganje standardnim konverzijama\\
+        npr. \inlinecode{char} $\rightarrow$ \inlinecode{int}
+        \item Slaganje korisničkim konverzijama
+    \end{enumerate}
+    \begin{lstlisting}
+double max (double i, double j)
+{ return (i>j) ? i : j; }
+const char* max (const char *p, const char *q)
+{ return (strcmp(p,q)>=0)?p:q; }
+double r=max(1.5,2.5); // max(double,double)
+double p=max(1,2.5); // (double)1; max(double,double)
+const char *q=max("Pera","Mika");// max(const char*,const char*)
+    \end{lstlisting}
+\end{itemize}
+
+\item Pristup elementima
+\begin{itemize}
+    \item Složeni podaci
+    \item Problem 2 definicije koje imaju identično telo sa različitim parametrima
+    \item Druga funkcija poziva prvu $\longleftarrow$ Rešenje
+    \item Slično za pokazivače i reference
+    \item Čudan slajd, izgleda kao dodatno objašnjavanje overloadinga
+    \begin{lstlisting}
+int& elem( int *a, int i) { return a[i]; }
+const int& elem(const int *a, int i) { return a[i]; }
+int a[20],i=10;
+const int b[20]={0};
+elem(a,i)=1;
+elem(b,i)=1; // ERROR
+int x=elem(b,i);
+    \end{lstlisting}
+\end{itemize}
+\newpage
+\item Napomene 
+\begin{itemize}
+    \item Uputstva za prevodioca, \textbf{anotacije}\\
+    \inlinecode{[[napomena]]}
+    \item Služe prevodiocu za provere i optimizacije
+    \item Prevodilac može da ih zanemari
+\end{itemize}
+\item Funkcije koje se ne vraćaju
+\begin{itemize}
+    \item Postoje funkcije koje se ne vraćaju na mesto poziva
+    \item Nasilno prekida rad programa sa \inlinecode{exit(kod)}
+    \begin{enumerate}
+            \item Kod = 0 \checkmark{}
+            \item Kod $\neq$ 0 X
+    \end{enumerate}
+
+    \item Anotacija \inlinecode{[[noreturn]]}
+    \item Ako ima negde \inlinecode{return}, kod postaje nepredvidiv
+\end{itemize}
+\item Operatori i izrazi
+\begin{itemize}
+    \item Novi operatori (12)
+    \begin{itemize}
+        \item[] unarni \inlinecode{::, ::, new, delete, .*, ->*, typeid, throw, alignof}, 4 \textit{cast} operatora
+    \end{itemize}
+    \item Postfiksni \inlinecode{++, --} imaju viši prioritet od prefiksnih
+    \item Prefiksni \inlinecode{++, --} $\rightarrow$ \inlinecode{lvalue}
+    \item Dodela vrednosti $\rightarrow$ \inlinecode{lvalue}
+    \item Ternarni operator je \inlinecode{lvalue} ako su drugi i treći operator \inlinecode{lvalue}
+\end{itemize}
+
+
+\item Operatori konverzije tipa
+\begin{itemize}
+    \item C \textit{cast} \\
+    \inlinecode{(tip) izraz} $\longleftarrow$ Ne preporučuje se
+    \item Novi \textit{cast} operatori
+    \begin{enumerate}
+        \item \inlinecode{static\_cast <oznaka\_tipa> (izraz)}
+        \item \inlinecode{reinterpret\_cast <oznaka\_tipa> (izraz)}
+        \item \inlinecode{const\_cast <oznaka\_tipa> (izraz)}
+        \item \inlinecode{dynamic\_cast <tip\_pokazivača\_ili\_reference> (izraz)}
+    \end{enumerate}
+    \item Bezbedne i nebezbedne konverzije\\
+    \inlinecode{int} $\rightarrow$ \inlinecode{float} \checkmark{}\\
+    \inlinecode{float} $\rightarrow$ \inlinecode{int} X
+    \item Notacija je nezgrapna i kabasta iz 2 razloga
+    \begin{enumerate}
+        \item Lakše se uoči u tekstu
+        \item Da programeri ne bi koristili
+    \end{enumerate}
+    \item Ako postoji potreba za eksplicitnim konverzijama $\rightarrow$ Preispitati projektne odluke
+\end{itemize}
+\item Statička konverzija
+\begin{itemize}
+    \item Prenosive konverzije
+    \begin{enumerate}
+        \item Između numeričkih tipova
+        \item Između pokazivača i \inlinecode{void*}
+        \item Nestandardne konverzije - definiše programer
+    \end{enumerate}
+    \item Primenjuju se automatski kad su bezbedne
+    \item Eksplicitan poziv kad je nebezbedno\\
+    npr. \inlinecode{void*} $\rightarrow$ drugi pokazivač, numerički tip $\rightarrow$ \inlinecode{char}
+    \item \inlinecode{nullptr} može da se dodeli bilo kom tipu pokazivača
+    \item Ne preporučuje se korišćenje \inlinecode{NULL} ili \inlinecode0
+\end{itemize}
+\item Reinterpretirajuća konverzija
+\begin{itemize}
+    \item Konverzija tipova bez logičke veze\\
+    npr. \inlinecode{int} $\rightarrow$ pokazivač
+    \item Nema pretvaranja vrednosti, istu vrednost različito interpretiramo
+    \item Jako nebezbedno
+\end{itemize}
+\item Konstanta konverzija
+\begin{itemize}
+    \item Dodavanje ili uklanjanje \inlinecode{const}
+    \item Dodavanje je bezbedno, uklanjanje nije
+\end{itemize}
+\end{xitemize}
+\newpage
+
+\section{Klase i objekti}
+\begin{xitemize}
+\item Osnovni pojmovi
+\begin{itemize}
+    \item Klasa je struktuirani korisnički tip koji obuhvata
+    \begin{enumerate}
+        \item Podatke koji opisuju stanje objekta klase
+        \item Funkcije namenjene definisanju operacija nad podacima
+    \end{enumerate}
+    \item Klasa je formalni opis aptrakcije koja ima
+    \begin{enumerate}
+        \item Internu implementaciju
+        \item Javni interfejs
+    \end{enumerate}
+    \item Instanca klase $\rightarrow$ objekat
+    \item Podaci klase $\rightarrow$ \textbf{atributi}, polja, podaci članovi
+    \item Funkcije klase $\rightarrow$ \textbf{metodi}, primitivne operacije, funkcije članice
+\end{itemize}
+\item Komunikacija objekata
+\begin{itemize}
+    \item Objekti klasa komuniciraju da ostvare složene funkcije
+    \item Poziv metoda $\rightarrow$ \textbf{upućivanje poruke}
+    \item Objekat može da menja stanje kad se pozove metod
+    \item \textbf{Objekat-klijent} - poziva metod
+    \item \textbf{Objekat-server} - metod mu je pozvan
+    \item Iz svog metoda se može pozvati metod drugog objekta iste ili druge klase
+    \item Unutar metode, članovima objekta-servera pristupa se navođenjem imena
+\end{itemize}
+\item Pravo pristupa
+\begin{itemize}
+    \item Sekcije
+\end{itemize}
+\begin{enumerate}
+    \item \inlinecode{private}
+    \begin{itemize}
+        \item Zaštićeni od spolja (\textbf{kapsulirani})
+        \item Pristupaju im samo metodi klase
+    \end{itemize}
+    \item \inlinecode{protected}
+    \begin{itemize}
+        \item Dostupni metodima iste klase + sve klase izvedene iz nje
+    \end{itemize}
+    \item \inlinecode{public}
+    \begin{itemize}
+        \item Dostupni spolja bez ograničenja
+    \end{itemize}
+\end{enumerate}
+\begin{itemize}
+    \item Preporučuje se redosled \inlinecode{private} $\rightarrow$ \inlinecode{protected} $\rightarrow$ \inlinecode{public}
+    \item Može da postoji više sekcija iste vrste
+    \item Podrazumevana labela je \inlinecode{private}
+
+\item \boxedimportant[BITNO]{Kontrola pristupa je stvar klase, a ne objekta\\
+Metod jednog objekta može da pristupa privatnim članovima drugog objekta iste klase}
+\item Kontrola pristupa je odvojena od koncepta dosega
+\begin{enumerate}
+    \item Odredi se postojanje
+    \item Proveravanje prava pristupa
+\end{enumerate}
+\end{itemize}
+\newpage
+\item Definisanje klase
+\begin{itemize}
+    \item Atributi
+    \begin{enumerate}
+        \item Mogu da budu i inicijalizovane - od C++11
+        \item Ne moguda budu tipa klase koja se definiše, ali su dozvoljeni pokazivači i reference na tu klasu
+    \end{enumerate}
+    \item Metodi
+    \begin{enumerate}
+        \item U definiciji mogu da se 
+        \begin{itemize}
+            \item[-] Deklarišu - samo prototip
+            \item[-] Definišu - kompletno telo
+        \end{itemize}
+        \item Funkcije definisane u definiciji klase su \inlinecode{inline} i mogu pristupati članovima imenom
+        \item Funkcije koje su samo deklarisane u definiciji klase moraju biti definisane kasnije, van definicije, sa proširenim dosegom za pristup članovima\\
+        \inlinecode{<ime\_klase>::<ime\_funkcije>}
+        \item Vrednost rezultata metoda može biti tipa klase koja se definiše, kao i pokazivač ili referenca na nju
+    \end{enumerate}
+    \item Definicija se piše tamo gde se klasa koristi, obično u \textit{header} fajl (\inlinecode{.h})
+    \item Nepotpuna definicija klase je \textbf{deklaracija}
+    \item Pre defincije, a posle deklaracije
+    \begin{enumerate}
+        \item Mogu da se definišu pokazivači i reference
+        \item Ne mogu da se definišu objekti te klase
+    \end{enumerate}
+\end{itemize}
+\item Objekti klase
+\begin{itemize}
+    \item Uobilajeno definisanje, kao kod standardnih tipova
+    \item Za svaki objekat formira se poseban komplet svih nestatičkih atributa
+    \item Nestatički metodi se pozivaju za objekte, a statički za klase
+    \item  Lokalne \inlinecode{static} promenljive metoda
+    \begin{enumerate}
+        \item Zajedničke za sve objekte
+        \item Žive od nailaska na njih do kraja programa
+        \item \boxedimportant[WTF]{Imaju svojstva lokalnih promenljivih globalnih funkcija}
+    \end{enumerate}
+\end{itemize}
+\item Podrazumevane operacije
+\begin{itemize}
+    \item Definisanje objekata, pokazivača i referenci na objekte i nizove objekata
+    \item Dodela vrednosti jednog objekta drugo
+    \item Uzimanje adrese \inlinecode\&
+    \item Pristupanje objektu preko pokazivača \inlinecode*
+    \item Pristupanje atributima i pozivanje metode neposredno pomoću \inlinecode.
+    \item Pristupanje atributima i pozivanje metoda posredno pomoću pokazivača \inlinecode{->}
+    \item Pristupanje elementima niza \inlinecode{[]}
+    \item Prenošenenje objekta kao argumenata po vrednosti, referenci ili pokazivaču
+    \item Vraćanje objekta iz funkcije po vrednosti, referenci ili pokazivaču
+    \item Preklapanje operatora može redefinisati dosta gorenavedenog
+\end{itemize}
+
+
+\item Pokazivač \inlinecode{this}
+\begin{itemize}
+    \item Pokazivač na tekući objekat
+    \item Unutar svako nestatičkog objekta je implicitno, \inlinecode{this} je skriveni argument svakog metoda\\
+    \inlinecode{objekat.f()} $\sim$ \inlinecode{f(\&objekat)}
+     \item Konstanti pokazivač na klasu čiji je metod član\\
+    Klasa \inlinecode{X}, \inlinecode{this} $\rightarrow$ \inlinecode{X* const}
+    \item Pristup se obavlja neposredno
+    \item Primeri korišćenja
+    \begin{enumerate}
+        \item Tekući objekat vratiti kao rezultat metoda
+        \item Adresa objekta je potrebna kao argument
+        \item Tekući objekat ubaciti u listu
+    \end{enumerate}
+    \begin{lstlisting}
+// Definicija metoda zbir(Kompleksni) klse Kompleksni
+Kompleksni Kompleksni::zbir(Kompleksni C){
+    Kompleksni t = *this; // u t se kopira tekuci objekat
+    t.real+=c.real;
+    t.imag+=c.imag;
+    return t;
+}
+//...
+int main(){
+    Kompleksni c, c1,c2;
+    //...
+    c=c1.zbir(c2);
+}
+    \end{lstlisting}
+\end{itemize}
+\item Inspektori i mutatori
+\begin{itemize}
+    \item \textbf{Inspektor} ili selektor $\rightarrow$ ne menja stanje objekta
+    \item \textbf{Mutator} ili modifikator $\rightarrow$ menja stanje objekta
+    \item Dobra praksa da se kaže koji tip od ova dve je metod
+    \item \inlinecode{const} iza liste parametara $\rightarrow$ inspektor
+    \item Postoji konstantan metod, ali je to druga stvar
+\end{itemize}
+
+\item Definisanje inspektora\\
+\inlinecode{<tip> ime(parametri) const \{definicija\}}
+\begin{itemize}
+    \item Notaciona pogodnost
+    \item Prevodilac nema načina da osigura da inspektor ne menja atribute\\ Eksplicitna konverzija može da probiju konrolu konstantnosti
+    \item U inspektoru \inlinecode{this} je \inlinecode{const X* const} 
+    \item Nije moguće menjati objekat pomoću \inlinecode{this}
+    \item Za nepromenljive objekte nije dozvoljeno pozivati metod koji nije inspektor
+    \begin{lstlisting}
+class X {
+public:
+    int citaj () const { return i; }
+    int pisi (int j=0) { int t=i; i=j; return t; }
+private:
+    int i;
+};
+X x; const X cx;
+x.citaj(); // OK - inspektor promenljivog objekta
+x.pisi(); // OK - mutator promenljivog objekta
+cx.citaj(); // OK - inspektor nepromenljivog objekta
+cx.pisi(); // ERROR - mutator nepromenljivog objekta
+    \end{lstlisting}
+\end{itemize}
+\newpage
+\item Nepostojani metodi (\inlinecode{volatile})
+\begin{itemize}
+    \item Suprotnost konstantnog metoda
+    \item Veza sa konkurentnim programiranjem
+    \item Neki drugi \textit{thread} može u svakom trenutku da promeni stanje objekta
+    \item Prevodilac ne izvršava optimizaciju
+    \item \inlinecode{volatile} može da se poziva za nepostojane i promenljive objekte
+    \item \inlinecode{const volatile} - za sve vrste objekata
+    \begin{lstlisting}
+class X {
+public:
+    X(){ kraj=false; }
+    int f() volatile { // da nije volatile, moguca optimizacija:
+    while(!kraj){/*...*/} // if (!kraj) while() {/*...*/}
+    } // u telu (...) se ne menja kraj
+    void zavrseno(){ kraj=true; }
+private:
+    bool kraj;
+    \end{lstlisting}
+\end{itemize}
+
+\item Modifikatori metoda \inlinecode{\&} i \inlinecode{\&\&}
+\begin{itemize}
+    \item Bez modifikatora \inlinecode{\&} i \inlinecode{\&\&} metod se može primeniti na \inlinecode{lvalue} i \inlinecode{rvalue}
+    \item Modifikator \inlinecode{\&} - tekući objekat može biti samo \inlinecode{lvalue}
+    \item Modifikator \inlinecode{\&\&} - tekući objekat može biti samo \inlinecode{rvalue}
+    \item \boxedimportant[BITNO]{ Mogu da postoje metodi čiji se potpisi razlikuju samo po ovom modifikatoru}
+    \begin{lstlisting}
+class U {
+public:
+    int f() & {return 1;}
+    int f() const & {return 2;}
+    int f() && {return 3;}
+};
+U u1; const U u2=u1;
+int i = u1.f(); int j = u2.f(); int k = U().f();
+    \end{lstlisting}
+\end{itemize}
+
+\item Pojam konstruktora
+\begin{itemize}
+    \item Specifična funkcija klase koju definiše početno stanje objekta
+    \item Isto ime kao klasa
+    \item Nema \inlinecode{return} tip, čak ni \inlinecode{void}
+    \item Proizvoljan broj proizvoljnih tipova parametara
+    \begin{enumerate}
+        \item Ne sme biti tip klase koju definiše ako je jedini parametar ili ako svi ostali imaju podrazumevanu vrednost
+        \item Dozboljen tip pokazivača na \inlinecode{lvalue} i \inlinecode{rvalue} date klase
+    \end{enumerate}
+    \item Implicitno se poziva prilikom kreiranja
+    \item Pristup članovima objekta kao i bilo koji drugi metod
+    \item Može biti preklopljen $\backslash$ \textit{overloadoded}
+\end{itemize}
+\item Podrazumevani konstruktor
+\begin{itemize}
+    \item Može se pozvati bez stvarnih argumenata - nema parametre ili su svi podrazumevani
+    \item Ugrađeni podrazumevani konstruktor je bez parametara i ima prazno telo
+    \item Ugrađeni konstruktor postoji smao ako klasa nije definisala nijedan drugi konstruktor
+    \item Definisanje nekog konstruktora se suspenduje ugrađeni\\
+    Restauracija ugrađenog konstruktora - deklaracija iza koje sledi \inlinecode{= default}
+    \item Kad se kreira niz objekata poziva se podrazumevani konstruktor po rastućem redosledu indeksa
+\end{itemize}
+\newpage
+\item Pozivanje konstruktora
+\begin{itemize}
+    \item Stvaranje bilo kakvog objekta
+\end{itemize}
+\begin{enumerate}
+    \item Definicija statičkog objekta
+    \item Definicija automatskog objekta
+    \item Dinamički objekat kreiran operatorom \inlinecode{new}
+    \item Kad se stvarni argument klasnog tipa prenosi u formalni
+    \item Kada se kreira privremeni objekat pri povratku iz funkcije
+\end{enumerate}
+\item Argumenti konstruktora
+\begin{itemize}
+    \item Pri stvaranju objekta moguće je navesti inicijalizator iza imena
+    \item Inicijalizator sadrži listu argumenata konstruktora u zagradama
+    \begin{enumerate}
+        \item \inlinecode{()} ili \inlinecode{\{\}}
+        \item Ako \inlinecode{\{\}} $\rightarrow$ može se pisati i \inlinecode{= \{...\}}
+        \item Nisu dozboljene prazne zagrade \inlinecode{()}\\
+        Deklaracija funkcije
+    \end{enumerate}
+    \item Moguća notacija \inlinecode{<objekat>  = <vrednost>}
+    \item Poziva se onaj konstruktor koji se najbolje salže po potpisu
+    \item Može da ima podrazumevane vrednosti
+    
+    \begin{multicols}{2}
+    \begin{lstlisting}
+class X {
+    char a; int b;
+public:
+    X ();
+    X (char, int=0);
+    X (const char*);
+    X(X); // ERROR
+    X(X*);
+    X(X&);
+    X(X&&);
+};
+X f () {
+    X x1; // X()
+    X x2{}; // X()
+    X x3={};// X()
+    X x(); // dekl. f-je
+    return x1;
+}
+\end{lstlisting}
+\columnbreak
+\begin{lstlisting}
+void g () {
+    char c='a';
+    const char *p="Ne volim OOP";
+    
+    X x1(c); // X(char,int)
+    X x2=c;
+    X x3(c,10);
+    X x4{c,20};
+    X x5={c,30};
+    X x6(p); // X(char*)
+    X x7(x1); // X(X&)
+    X x8{x1};
+    X x9={x1};
+    X x10=f(); // X(X&&)
+    X* p1=new X;// X()
+    X* p2=new X(); // X(char,int)
+    X* p4=new X{c,10};
+}
+    
+    \end{lstlisting}
+    \end{multicols}
+\end{itemize}
+\newpage
+\item Konstrukcija članova
+\begin{itemize}
+    \item Pre izvršavanja tela konstruktora
+    \begin{enumerate}
+        \item Inicijalizuju se prosti tipovi
+        \item Pozivaju se konstruktori za klasne tipove
+    \end{enumerate}
+    \item Inicijalizatori mogu da se navedu u zaglavlju definicije (NE deklaracije) konstruktora, iza znaka \inlinecode:
+    \item \boxedimportant[]{Ako atributi ima inicijalizatoru telu klase i u definiciji konstruktora $\rightarrow$ primenjuje se inicijalizator iz definicije konstruktora}
+    \item \boxedimportant[BITNO]{Inicijalizacija atributa - \textbf{redosled navođenja u definiciji klase}
+    \begin{itemize}
+        \item[-] Bez obzira da li su primitivni ili klasni tipovi
+        \item[-] Bez obzira na redosled u listi inicijalizatora
+    \end{itemize}}\\\\
+    \inlinecode{class X \{\\
+    private:}\\
+    \hspace*{0.5cm}
+    \inlinecode{int i = 0; \\
+    \}
+    }
+    \item Do C++11 nije bila dozvoljena inicijalizacija atributa u definiciji klase
+    \item Inicijalizacija je različita od operacije dodele koja se može vršiti jedino unutar tela konstruktora
+    \item Inicijalizacija je neophodna
+    \begin{enumerate}
+        \item Kada ne postoji podrazumevani konstruktor klase atributa
+        \item Kada je atribut nepromenljiv
+        \item Kada je atribut referenca
+    \end{enumerate}
+    \begin{lstlisting}
+class YY { public: YY (int j) {...} };
+class XX {
+    YY y; int i=0;
+public:
+    XX (int);
+};
+XX::XX (int k) : y(k+1), i(k-1) {...} // y=k+1, i=k-1
+    \end{lstlisting}
+    \begin{lstlisting}
+// Primer konstrukcija dva objekta od kojih jedan sadrzi drugi
+class Kontejner {
+public:
+    Kontejner () : deo(this) {...}
+private:
+    Deo deo;
+};
+class Deo{
+public:
+    Deo(Kontejner* kontejner):mojKontejner(kontejner) {...}
+private:
+    Kontejner* mojKontejner;
+};
+    \end{lstlisting}
+    \end{itemize}
+\begin{multicols}{2}
+\item Delegirajući konstruktor
+\begin{itemize}
+    \item U listi inicijalizatora definicije delegiruajućeg konstruktora može da se navede poziv drugog konstruktora
+    \item Pre izvršenja tela delegirajućeg konstruktora, izvršava se ciljni konstruktor
+\end{itemize}
+\columnbreak
+\begin{lstlisting}
+class T {
+    T(int i){}
+    T():T(1){} // delegirajuci: T(), ciljni: T(int)
+    T(char c): T(0.5){} // ERROR - rekurzija
+    T(double d): T('a'){}   
+}
+\end{lstlisting}
+\end{multicols}
+\begin{itemize}
+     \item Kad se navodi ciljni konstruktor, navodi se samo on
+    \item Ako dolazi do neposrednog ili posrednog delegiranja $\rightarrow$ greška\\
+    Prevodilac ne otkriva ovakav tip greške
+\end{itemize}
+\item Eksplicitni poziv konstruktora
+\begin{itemize}
+    \item Ovakav poziv kreira primvremeni objekat klase pozivom odgovarajućeg konstruktora
+    \item Isto se dešava ako se u inicijalizatoru objekta eksplicitno navede poziv konstruktora\\
+    \inlinecode{Kompleksni c = Kompleksni(0.1, 5);}\\
+    Privremeni objekat se kopira u \inlinecode c - zavisi od prevodioca
+\end{itemize}
+\item Konstruktor kopije
+\begin{itemize}
+    \item Kopirajući konstruktor
+    \item Pri inicijalizaciji objekta O1 drugim objektom O2 iste klase poziva se konstruktor kopije
+    \item Ugrađeni, implicitno definisani, konstruktor kopije
+    \begin{enumerate}
+        \item Vrši inicijalizaicju članova O1 članovima O2 (pravi \textbf{plitku kopiju} - \textit{shallow copy})
+        \item Primitivni atributi se prosto kopiraju - uključujući i pokazivače
+        \item Za klasne atribute se pozivaju njihovi konstruktori kopije
+    \end{enumerate}
+    \item Ugrađeni konstruktor kopije se briše ili suspenduje
+    \begin{enumerate}
+        \item Eksplicitno\\
+        \inlinecode{X(const X\&) = delete}
+        \item Implicitno - pisanjem premeštajućeg konstruktora ili premeštajućeg operatora deodele\\
+        Restauriranje konstruktora kopije \inlinecode{X(const X\&) = default}
+    \end{enumerate}
+    \item Problem pokazivača $\rightarrow$ pravimo \textbf{duboku} kopiju - \textit{deep copy}
+    \item Parametri konstruktora kopije su \inlinecode{X\&} ili \inlinecode{const X\&}
+    \item Ostali eventualni parametri moraju biti podrazumevane vrednosti
+\end{itemize}
+\item Pozivanje konstruktora kopije
+\begin{itemize}
+    \item Poziva se jednim stvarnim argumentom
+    \item Konstruktor kopij se poziva kada se objekat inicializuje objektom iste klase i to
+    \begin{enumerate}
+        \item Prilikom stvaranja trajnog, automatskog, dinamičkog ili privremenog objekta
+        \item Prilikom prenosa argumenata po vrednosti u funkciju (stvara se automatski objekat)
+        \item Prilikom vraćanja vrednosti iz funkcije (stvara se privremeni objekat
+    \end{enumerate}
+    \item Prevodilac sme da preskoči poziv konstruktora kopije zbog optimizacije
+    \begin{itemize}
+        \item[-] Ako se stvarani objekat inicijalizuje privremenim objektom iste klase
+        \item[-] Izostaju bočno efekti koje programer očekuje
+        \item[-] Čak i tada mora postojati konstruktor kopije ili premeštajući konstruktor
+    \end{itemize}
+    \begin{lstlisting}
+class XX {
+public:
+    XX (int);
+    XX (const XX&); // konstruktor kopije
+    //...
+};
+XX f(XX x1) {
+    XX x2=x1; // poziv konst. kopije XX(XX&) za x2
+    return x2; // poziv konst. kopije za privremeni
+} // objekat u koji se smesta rezultat
+void g() {
+    XX xa=3, xb=1;
+    xa=f(xb); // poziv konst. kopije samo za parametar x1,
+// a u xa se samo prepisuje
+// privremeni objekat rezultata, ili se
+} // poziva XX::operator= ako je definisan
+    \end{lstlisting}
+\end{itemize}
+\newpage
+\item Premeštajući konstruktor
+\begin{itemize}
+    \item Konstruktor koji se poziva za konstrukciju objekta istog tipa, pri čemu je izvorišni objekat na kraju životnog veka
+    \item Izvorišni objekat je \textbf{nvrednost} (nestajuća vrednost) - \textit{xvalue (expiring value)}
+    \item Izvorišni objekat ne mora da se sačuva
+    \item Samo premestimo njegove dinamičke delove u odredišni objekat
+    \item Nema kopiranja dinamičkih delova
+    \item Posledica $\rightarrow$ premeštajući konstruktor je efikasniji od kopirajućeg
+    \item Modifikovati izvorišni objekat da njegova destrukcija ne povuče razaranje premeštenih delova
+    \item Postoji ugrađeni, implicitno definisani, premeštajući konstruktor, ali ona ima problem - ne briše originalne pokazivače u izvorišnom objektu
+    \item Ugrađeni premeštajući konstruktor se briše ako se eksplicitno definiše bar jedan od navedenih: \marginnote{Nisam 100\% siguran za ovo BAR}
+    \begin{enumerate}
+        \item Premeštajući konstruktor
+        \item Kopirajući konstruktor
+        \item Destruktor
+        \item Operator dodele
+    \end{enumerate}
+    
+\end{itemize}
+
+\item Pozivanje premeštajućeg konstruktora
+\begin{itemize}
+    \item Paramater je \inlinecode{X\&\&}, ostali su podrazumevani parametri \marginnote{BEZ CONST}
+    \item Prevodilac poziva premeštajući konstruktor
+    \begin{enumerate}
+        \item Ako izvorišni objekat nestaje
+        \item Ako u klasi postoji premeštajući konstruktor
+    \end{enumerate}
+    \item Ako u klasi ne postoji premeštajući
+    \begin{enumerate}
+        \item Poziva se kopirajući konstruktor
+        \item Semantika je ista
+        \item Promena je samo u efikasnosti
+    \end{enumerate}
+    \begin{lstlisting}
+class Niz {
+    double* a; int n;
+public: ... Niz( Niz&& niz ){ a=niz.a; niz.a=nullptr; n=niz.n; }
+} ...
+Niz f(Niz niz){ return niz; }
+    \end{lstlisting}
+\end{itemize}
+\item Konverzioni konstruktor
+\begin{itemize}
+    \item Konverzija između tipova od kojih je bar jedan klasa
+    \item Odredišni tip mora biti klasa\\
+    \inlinecode{X::X(T\&) X:: X(T)} $\rightarrow$ konverzija tipa T u X
+    \item Korisničke konverzije se primenjuju automatski ako je jednoznačan izbor konverzije, izuzev u slučaju \inlinecode{explicit} konstruktora
+    \item Konverzija mora biti posredna\\
+    \inlinecode{U::U(T\&), V::V(U\&) } $\rightarrow$ \inlinecode{V(U(t))} eksplicitno
+    \item Nije moguće konvertovati u primitivni tip
+    \item Konverzija argumenata i rezultat funkcije
+    \begin{enumerate}
+        \item Pri pozivu funkcije
+        \begin{itemize}
+            \item[-] Inicijalizuju se parametri stvarnim argumentima uz eventualnu konverziju tipa
+            \item[-] Parametri se ponašaju kao automatski lokalni objekti pozvane funkcije
+            \item[-] Ovi objekti se konstruišu pozivom odgovarajućih konstruktora
+        \end{itemize}
+        \item Pri povratku iz funkcije
+        \begin{itemize}
+            \item[-] Konstruiše se privremeni objekat koji prihvata vrednost \inlinecode{return} izraza na mestu poziva
+        \end{itemize}
+    \end{enumerate}
+    \newpage
+    \begin{lstlisting}
+//Konverzioni konstruktor - PRIMER
+class T {
+public:
+    T(int i); // Konstruktor
+};
+T f (T k) {
+    //...
+    return 2; // Poziva se konstruktor T(2)
+}
+int main () {
+    T k(0);
+    k=f(1); // Poziva se konstruktor T(1)
+    //...
+}
+    \end{lstlisting}
+\end{itemize}
+\item Destruktor
+\begin{itemize}
+    \item Specifična funkcija članica koja uništava objekat
+    \item Nosi isto ime kao klasa, uz $\sim$ ispred imena
+    \item Nema tip rezltata i ne može imati parametre $\rightarrow$ najviše 1 po klasi
+    \item Destruktor se piše kada treba osloboditi memoriju i ostale resurse
+    \item Česta potreba $\rightarrow$ klasa sadrži članove koji su pokazivači ili reference na druge objekte\\
+    Dobra praksa tad $\rightarrow$ metod za uništavanje delova, pozvan iz konstruktora
+    \item Ponašanje kao i drugim metodima
+\end{itemize}
+
+
+\item Pozivanje destruktora
+\begin{itemize}
+    \item Implicitno se poziva na kraju životnog veka objekta
+    \item Pri uništavanju dinamičkog objekte koristeći \inlinecode{delete}
+    \item Pri uništavanju dinamičkog niza - u smeru opadajućih indeksa
+    \item Redosled je uvek obrnut od konstruktora
+    \item Eksplicitno pozivanje\\
+    \inlinecode{X.$\sim$X(), px->$\sim$X(), this->$\sim$X()}
+    \begin{itemize}
+        \item[-] Ne preporučuje se, objekat nastavi da živi i posle ovoga
+    \end{itemize}
+    \item Posle izvršenja automatskog destruktora se oslobađa zauzeta memorija
+\end{itemize}
+\item Statički (zajednički) atributi
+\begin{itemize}
+    \item Pri stvaranju objekta klase $\rightarrow$ poseban komplet nestatičkih atributa
+    \item Ključna reč - \inlinecode{static}
+    \item Jedan primerak za celu klasu, svi objekti ga dele\\
+    \inlinecode{static <tip> ime;}
+\end{itemize}
+\item Definisanje statičkog atributa
+\begin{itemize}
+    \item U klasi se samo deklariše
+    \item Mora da se definiša na globalnom nivou
+    \item Svi oblici inicijalizatora \checkmark{}
+    \item Inicijalizacija
+    \begin{enumerate}
+        \item Pre prvog pristupa njemu
+        \item Pre stvaranja objekta date klase
+    \end{enumerate}
+    \item Obraćanje \inlinecode{int <klasa>::X=5; // bez static}
+    \item Ako se navede inicijalizator $\rightarrow$ 0
+    \item \boxedimportant[ČUDNO]{Imenovana \textbf{celobrojna} konstanta može se definisati i u definiciji klase}
+    \marginnote{Ima veze sa constexpr?}
+   
+\end{itemize}
+\newpage
+\item Statički i globalni podaci
+\begin{itemize}
+    \item Sličnosti
+    \begin{enumerate}
+        \item Trajni podaci $\rightarrow$ sličan životni vek
+        \item Definicija na globalnom nivou
+    \end{enumerate}
+    \item Razlike
+    \begin{enumerate}
+        \item Statički atributi pripadaju klasi
+        \item Doseg imena statičkog atributa je klasa
+        \item Statičkim atributima je moguće ograničiti pristup
+    \end{enumerate}
+    \item Statički atribut ima sva svojstva globalnog statičkog podatka osim dosega imena i kontrole pristupa
+    \item Smanjuje se potreba za globalnim objektima
+\end{itemize}
+
+
+\item Statički (zajednički) metodi
+\begin{itemize}
+    \item Funkcija klase, a ne svakog posebnog objekta
+    \item Zajednički za sve objekte
+    \item Primena
+    \begin{enumerate}
+        \item Opšte usluge
+        \item Obrada statičkih atributa
+    \end{enumerate}
+    \item Deklarišu se dodavanjem \inlinecode{static} ispred deklaracije
+    \item Svojstva globalnih funkcija osim dosega i kontrole pristupa
+    \item Nemaju \inlinecode{this}
+    \begin{enumerate}
+        \item Ne mogu pristupati nestatičkim članovima direktnim imenovanjem
+        \item Modifikatori \inlinecode{const} i ostali nemaju smisla
+    \end{enumerate}
+    \item Mogu pristupati nestatičkim članovima konkretnih objekata
+    \begin{enumerate}
+        \item Pristup preko parametra
+        \item Pristup lokalnom objekta
+        \item Pristup globalnom objektu
+    \end{enumerate}
+    \item Direktan pristup statičkim članovima\\
+    \inlinecode{<klasa>::<ime\_funkcije>(argumenti);}
+    \item Može se pozvati za konkretan objekat, ali izbegavati\\
+    Levi operand tada samo nađe tip bez ikakvog izračunavanja
+    \item Mogu se pozivati i pre stvaranja objekta klase
+    \item Uslužna klasa $\rightarrow$ sve statički metodi, obrisanog ugrađenog konstruktora - kao biblioteka
+\begin{center}
+    \begin{adjustwidth}{-4cm}{-2.5cm}
+
+    \begin{multicols}{2}
+    \begin{lstlisting}
+class X {
+    static int x; // staticki atribut
+    int y;
+public:
+    static int f(X); // staticki metod (deklaracija)
+    int g();
+};
+int X::x=5; // definicija statickog atributa
+int X::f(X x1){ // definicija statickog metoda
+    int i=x; // pristup statickom atributu X::x
+    int j=y;  // ERROR - X::y nije staticki
+    int k=x1.y; // ovo moze;
+    (x1++).x; // x1++ (ako je definisan post inkrement operator) se ne izracunava po Tartalji 
+    return x1.x;  // i ovo moze, ali nije preporucljivo
+} // izraz "x1" se ne izracunava 
+    \end{lstlisting}
+    \columnbreak
+    \begin{lstlisting}
+
+int X::g () {
+    int i=x; // nestaticki metod moze da koristi
+    int j=y; // i staticke i nestaticke atribute
+    return j; // y je ovde this->y;
+}
+int main () {
+    X xx;
+    int p=X::f(xx); 
+    // X::f moze neposredno, bez objekta;
+    int q=X::g(); 
+    // ERROR - za X::g mora konkretan objekat
+    xx.g(); // ovako moze;
+    p=xx.f(xx); // i ovako moze, ali nije preporucljivo
+}
+
+ 
+  
+   
+    
+     
+     
+     
+    \end{lstlisting}
+    \end{multicols}
+\end{adjustwidth}
+\end{center}
+ \newpage
+    \begin{lstlisting}
+// Zadatak koji se pojavio na kolokvijumu
+class X {
+public: static X* kreiraj () { return new X; }
+private: X(); // Konstruktor je privatan
+};
+int main() {
+    X x; // ERROR
+    X* px=X::kreiraj(); // OK
+}
+ \end{lstlisting}
+
+\end{itemize}
+\item Prijatelji klasa
+\begin{itemize}
+    \item Kad je potrebno da klasa ima povlašćene korisnike koji mogu da pristupaju njenim privatnim članovima
+    \item Povlašćene mogu biti
+    \begin{enumerate}
+        \item Funkcije
+        \item Cele klase
+    \end{enumerate}
+    \item Nazivamo ih \textbf{prijateljima} - \textit{friends}
+    \item Prijateljstvo, kao relacija između klasa
+    \begin{enumerate}
+        \item Ne nasleđuje se
+        \item Nije simetrično \frownie
+        \item Nije tranzitivno
+    \end{enumerate}
+    \item Reguliše isključivo pravo pristupa, a ne i oblast važenja i vidljivost identifikatora
+\end{itemize}
+\item Prijateljski funkcije
+\begin{itemize}
+    \item Nisu članice klasa ali imaju pristup privatnim članovima
+    \item Mogu biti metode druge klase ili globalne funkcije
+    \item Funkcija je prijateljska ako se u definiciji klase navede njena deklaracija ili definicija sa modifikatorom \inlinecode{friend}
+    \item Klasa mora eksplicitno da naglasi prijateljstvo
+    \item Ako u definiciji klase pišemo prijateljsku funkciju
+    \begin{enumerate}
+        \item I dalje nije članica klase iako je definišemo unutar nje
+        \item Podrazumeva se da je \inlinecode{inline}
+        \item Funkcija nema klasni doseg već doseg identifikatora klase
+    \end{enumerate}
+    \item Nevažno je pravo pristupa za \inlinecode{friend} funkciju
+    \item Nema \inlinecode{this}
+    \item Funkcija može biti prijatelj većem broju klasa istovremeno
+    \begin{lstlisting}
+class X {
+    friend void g(int, X&); // prijateljska globalna funkcija
+    friend void Y::h(); // prijateljski metod druge klase
+    friend int o(X x){return x.i;}// definicija globalne f-je
+    friend int p(){return i;} // ERROR - nema this
+    int i;
+public:
+    void f(int ip) {i=ip;}
+};
+void g (int k, X &x) { x.i=k; }
+int main () {
+    X x; int j;
+    x.f(5); // P preko metoda
+    g(6,x); // Postavljanje preko prijateljske funkcije
+    j=o(x); // Citanje preko prijateljske funkcije
+}
+    \end{lstlisting}
+\end{itemize}
+ \newpage
+\item Prijateljske funkcije i metodi
+\begin{itemize}
+    \item Nekad je bolja prijateljska funkcija od metoda
+    \item Metod mora da se pozove za objekat date klase, dok globalnoj funkciji možemo dostaviti i oblik drugog tipa\\
+    Nemoguća konverzija skrivenog argumenta u metodu
+    \item Pristup privatnim članovima više klasa - simetrično rešenje
+    \item Nekad je jenotacija pogodnija\\
+    \inlinecode{max(a,b)} ili \inlinecode{a.max(b)}
+    \item Kad se preklapaju operator, često je jednostavnije definisati globalne operatorske funkcije nego metode
+\end{itemize}
+\item Prijateljske klase
+\begin{itemize}
+    \item Ako su svi metodi klase Y prijateljske funkcije klase X, onda je Y prijateljska klasa (\textit{friend class}) klasi X\\\\
+    \inlinecode{class X \{}\\
+    \hspace*{1cm}\inlinecode{friend Y; // Ako je klasa Y definisana ili deklarisana}\\
+    \hspace*{1cm}\inlinecode{friend class Z; // Ako Z nije ni definisana ni deklarisana}\\
+    \inlinecode{\};}
+    \item Svi metodi klase Y pristupaju privatnim članovima klase X
+    \item Prijateljske klase se često koriste kad neke dve klase imaju tesnu vezu
+\end{itemize}
+\item Ugnježdene klase
+\begin{itemize}
+    \item Klase mogu da se deklarišu ili definišu unutar definicije druge klase
+    \item Koristi se kada neki tip semantički pripada samo datoj klasi
+    \item Povećava čitljivost i smanjuje potrebu za globalnim tipovima
+    \item Unutar definicije klase se mogu navesti i definicije nabrajanja \inlinecode{enum} i tipova \inlinecode{typedef}
+    \item Ugnježdena klasa se nalaziu dosegu imena okružujuće klase (izvan nje pristup samo sa \inlinecode{::})
+    \item Iz okružujuće klase u ugnježdenu \inlinecode{., ->, ::}
+    \item Doseg imena okružujuće klase O se proteže na ugnježdenu klasu U\\
+    Pristup iz U do članova O samo sa \inlinecode{., ->}
+    \item U ugnježdenoj klasi mogu direktno da se koriste identifikatori
+    \begin{enumerate}
+        \item \boxedimportant[]{Tipova iz okružujuće klase $\longleftarrow$ Samo od konkretnog objekta}
+        \item Konstanti tipa nabrajanja okružujuće klase
+        \item Statički članovi okružujuće klase
+    \end{enumerate}
+    \item \boxedimportant[Zar nije obrnuto?]{Ovo važi ako ime nije sakriveno imenom člana \textbf{ugnježdene} klase}\\\\
+    \inlinecode{<id\_okružujuće>::<id\_ugnježdene>::<id\_statičkog>}
+    \item Ugnježdena klasa je implicitno prijatelj okružujuće
+    \item Okružujuća klasa nije prijatelj ugnježdene \frownie $\longleftarrow$ ugnježdena klasa
+    \begin{lstlisting}
+int x,y;
+class Spoljna {
+public:
+    int x; static int z;
+    class Unutrasnja {
+        void f(int i, Spoljna *ps) {
+            x=i; // ERROR - nepoznat objekat klase Spoljna
+            Spoljna::x=i; // ERROR - isti uzrok
+            z=i; // pristup statickom clanu Spoljna
+            ::x=i; // pristup globalnom x;
+            y=i; // pristup globalnom y;
+            ps->x=i; // pristup Spoljna::x objekta *ps; 
+        }
+    };
+};
+Unutrasnja u; // ERROR
+Spoljna::Unutrasnja u; // OK
+    \end{lstlisting}
+\end{itemize}
+
+\item Strukture
+\begin{itemize}
+    \item Struktura je klasa kod koje su svi članovi podrazumevano javni\\
+    Može se menjati eksplicitnim korišćenjem \inlinecode{public:} i \inlinecode{private:}
+    \item C++ struktura može imati i metode
+    \item Strukture se koriste za definisanje struktuiranih podataka koje ne predstavljaju apstrakciju i generalno nemaju značajnijih operacija
+    \item Tipično imaju samo konstruktor, uz eventualni destruktor
+\end{itemize}
+\item Lokalne klase 
+\begin{itemize}
+    \item Definišu se unutar funkcija
+    \item Identifikator ima doseg od deklaracije do kraja bloka u kom je deklarisan
+    \item Unutar klase dozvoljeno je korišćenje iz okružujućeg dosega
+    \begin{enumerate}
+        \item Identifikatora tipova
+        \item Konstanti tipa nabrajanja
+        \item Trajnih podataka (statičkih atributa, statičkih lokalnih i globalnih)
+        \item Spoljašnjih (\inlinecode{extern}) podataka i funkcija
+    \end{enumerate}
+    \item Metodi lokalne klase moraju da se definišu unutar definicije klasa
+    \item Lokalna klasa ne može da ima statičke atribute, dok može imati statičke metode
+    \begin{lstlisting}
+int x;
+void f() {
+    static int s;
+    int x;
+    extern int g();
+    class Lokalna {
+    public:
+        int h (){ return x; } // ERROR - x je automatska prom.
+        int j (){ return s; } // OK: s je staticka promenljiva
+        int k (){ return ::x; } // OK: x je globalna promenljiva
+        int l (){ return g(); } // OK: g() je spoljasnja funkcija
+    };
+}
+Lokalna *p = 0; // ERROR - nije u dosegu
+    \end{lstlisting}
+\end{itemize}
+\item Pokazivači na članove klase
+\begin{itemize}
+    \item Dodelom vrednosti pokazivaču na članove klase označi se nei član klase\\
+    Kao pokazivačka aritmetika indeksa u nizu
+    \item Deklaracija\\
+    \inlinecode{<tip\_člana><klasa>::*<identifikator>}
+    \item Formiranje adrese\\
+    \inlinecode{<identifikator> = \&<klasa>::<član>}
+    \item Pristup\\
+    \inlinecode{<objekat>.*<identifikator>}\\
+    \inlinecode{<pokazivač\_na\_objekat>->*<identifikator>}
+    \item \inlinecode{.*} i \inlinecode{->*} imaju prioritet 14 i asocijativnost sleva na desno
+    \begin{lstlisting}
+class Alfa {... public: int a, b; };
+
+int Alfa::*pc;// pc je pokazivac na int clanove klase Alfa
+Alfa alfa,*beta;
+beta=&alfa;
+
+pc=&Alfa::a;// pc pokazuje na clanove a objekata klase Alfa
+alfa.*pc = 1; // alfa.a=1;
+beta->*pc = 1; // beta->a=1;
+
+pc=&Alfa::b;// pc pokazuje na clanove b objekata klase Alfa
+alfa.*pc = 2; // alfa.b=2;
+beta->*pc = 2; // beta->b=2;
+    \end{lstlisting}
+\end{itemize}
+\end{xitemize}
+\begin{center}
+    SI KOLOKVIJUM 1
+\end{center}
+\noindent\makebox[\linewidth]{\rule{\paperwidth}{0.4pt}}
+
+\end{document}
