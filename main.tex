@@ -2077,8 +2077,8 @@ X& X::operator=(const X& x){
         \inlinecode{premesti(x)}\\
         \inlinecode{brisi(x)}
         \end{cases}$
-        \item Ovi metodi se koriste na mnogo mesta, pa je zgodno napisati ih samo jednom
-        \item Alternativa - \textit{copy-and-swap} koja objedinjuje dva tipa operatora dodele\\
+        \item[-] Ovi metodi se koriste na mnogo mesta, pa je zgodno napisati ih samo jednom
+        \item[-] Alternativa - \textit{copy-and-swap} koja objedinjuje dva tipa operatora dodele\\
         Umesto po referenci, prosledi se kopija desnog operanda na stek, zatim se izvrši razmena objekata i destruktor obriše ostatke levog operanda kada skidamo objekta sa steka
     \end{itemize}
     \begin{lstlisting}
