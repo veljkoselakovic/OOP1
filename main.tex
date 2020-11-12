@@ -13,6 +13,46 @@
 \usepackage[none]{hyphenat}
 \usepackage[bottom = 0.5in]{geometry}
 \usepackage{changepage}
+\usepackage{centernot}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               Struktura dokumenta             %
+% Sekcije = Pojedinačna prezentacija            %
+% Ime stavke = Ime slajda                       %
+% Tekst = Tekst sa slajdova/Moje tumačenje      %
+% Kod = Primeri sa slajdova/Moji primeri        %
+%                   Komande                     %
+% \section - za novu sekciju                    %
+% \begin{xitemize} - Okruženje za ime stavke    %
+%               Pojedinačna stavka sa \item     %
+% \begin{itemize} - Okruženje za tekst          %
+%               Pojedinačna stavka sa \item     %
+% \begin{enumerate} - Okruženje za tekst označen%
+%               brojevima. Pojedinačna stavka   %
+%               sa \item                        %
+% \begin{lstlisting} - Okruženje za kod         %
+% \begin{multicols}{2} - Okruženje za dve       %
+%               kolone. Koristi se ako je kod   %
+%               kratak ili je sam tekst         %
+%               struktuiran da ima dosta mesta  %
+%               dosta mesta sa desne strane     %
+% \columnbreak - Komanda koja odvaja dve kolone %
+% \inlinecode{ TEKST } - Koristi specijalan font%
+%               da označi reč kao kod. Koristi  %
+%               se kad je kratak kod do jednog  %
+%               reda, ili ako je keyword u textu%
+% \checkmark - Znak za štikliranje              %
+% \boxedimportant[ ANOTACIJA ]{ TEKST } - Tekst %
+%               za koji se smatra da treba da   %
+%               bude uokviren. Anotacija nije   %
+%               obavezna, ali može da bliže     %
+%               objasni zašto je uokvireno      %
+% \hzline - Horizontalna linija za odvajanje    %
+%               gradiva u zavisnosti od smera   %
+%               i/ili kolokvijuma               %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 % Definisanje lstset za formatiran kod
 \definecolor{dkgreen}{rgb}{0,0.6,0}
@@ -63,6 +103,8 @@
 
             }
 }
+% Kod za horizontalnu liniju
+\providecommand{\hzline}{\noindent\makebox[\linewidth]{\rule{\paperwidth}{0.4pt}}}
 \addtolength{\topmargin}{-.875in}
 
 \title{OOP1\\\large Objektno-orijentisano programiranje 1}
@@ -1828,10 +1870,297 @@ alfa.*pc = 2; // alfa.b=2;
 beta->*pc = 2; // beta->b=2;
     \end{lstlisting}
 \end{itemize}
+
 \end{xitemize}
 \begin{center}
     SI KOLOKVIJUM 1
+    \hzline
 \end{center}
-\noindent\makebox[\linewidth]{\rule{\paperwidth}{0.4pt}}
+\section{Preklapanje operatora}
+\begin{xitemize}
+\item Pojam preklapanja operatora
+\begin{itemize}
+    \item Drugi naziv - \textbf{preopterećivanje operatora} - \textit{operator overloading}
+    \item Nova značenja operatora za korisničke tipove
+    \item Sličan princip kao kod preklapanja funkcija
+    \item Operatorske funkcije nose ime \inlinecode{operator@}, gde je \inlinecode@ neki operator ugrađen u jezik
+    \item Izraz \inlinecode{T1 @ T2} može biti tumačen kao
+    \begin{enumerate}
+        \item \inlinecode{operator@(T1, T2);} - \inlinecode{friend} funkcija
+        \item \inlinecode{T1.operator@(T2);} - operatorski metod
+    \end{enumerate}
+    \begin{lstlisting}
+class Kompleksni {
+private:
+    double real, imag;
+public:
+    Kompleksni (double, double); // Konstruktor
+        // Operator + u obliku globalne prijateljske funkcije
+        friend Kompleksni operator+(Kompleksni, Kompleksni); 
+        Kompleksni operator-(Kompleksni K){ // Klasni metod
+        Kompleksni novi_broj;
+        novi_broj.real = this->real - K.real;
+        novi_broj.imag = this->imag - K.imag;
+        return novi_broj;
+    }
+};
+// Definicija konstruktora
+Kompleksni::Kompleksni(double r=0.0, double i = 0.0) : real(r), imag(i) {} 
+Kompleksni operator+ (Kompleksni K1, Kompleksni K2){
+    Kompleksni novi_broj;
+    novi_broj.real = this->real + K.real;
+    novi_broj.imag = this->imag + K.imag;
+    return novi_broj;
+}
+/*...*/
+Kompleksni K1(1.0, 1.0), K2(2.0, 2.0), K3, K4;
+K3 = K1+K2; // operator+(K1, K2);
+K4 = K3-K2; // K3.operator-(K2);
+    \end{lstlisting}
+\end{itemize}
+\item Ograničenja preklapanja operatora
+\begin{itemize}
+    \item Sledeći operatori se \textbf{ne} mogu preklopiti:\\
+    \inlinecode{., .*, ::, ?:, sizeof, alignof, typeid, throw}
+    \item Ne može se menjati operator nekog primitivnog tipa
+    \item Ne može mo praviti nove operatore, kao ni menjati osobine postojećih $\begin{cases}
+        \textbf{Prioritet}\\
+        \textbf{n-arnost}\\
+        \textbf{Asocijativnost}
+        \end{cases}$
+    \item Neki operatori imaju specijalna ograničenja\\
+    \inlinecode{=}, postfiksni \inlinecode{++} i \inlinecode{ --, [], ->, (tip), new, delete}
+\end{itemize}
+\item Pravila preklapanja operatora
+\begin{itemize}
+    \item Operatori koji su definisani implicitno\\
+    \inlinecode{=, \&, ., ,} (zapeta),  \underline{\inlinecode{*, ->, []}} $\longleftarrow$ Poslednja 3 rade normalno i kad su preklopljeni, samo se sad mogu \hspace*{4.85cm}primeniti i na obektu
+    \item Vraćeni rezultat je proizvoljan
+    \item Ako se simbol piše slovima (\inlinecode{new, delete}), onda stoji odvojeno od \inlinecode{operator}
+    \item Operatorske funkcije ne mogu imati podrazumevane vrednosti
+    \item Operatorski metodi ne mogu biti statički, osim \inlinecode{new} i \inlinecode{delete}
+    \item Deo potpisa operatorskog metoda čine i modifikatori tekućeg objekta\\
+    \inlinecode{const, volatile, \&, \&\&}
+\end{itemize}
+\item Bočni efekti i veze između operatora
+\begin{itemize}
+    \item Ne podrazumeva se bočni efekat kod operatora koji ga inače imaju\\
+    \inlinecode{++, --, =, +=, -=, ...}
+    \item Loša praksa
+    $\begin{cases}
+     \textbf{Može se preklopiti da nema bočnog efekta tamo gde obično postoji} \\
+     \textbf{Može se napraviti bočni efekat tamo gde ga inače nema}
+    \end{cases}$
+    \item Veze koje postoje između primitivnih operatora nisu garantovane\\
+    \inlinecode{a+=b} $\centernot\implies$ \inlinecode{a = a + b}
+    \item Ovi operatori se moraju eksplicitno preklopiti
+\end{itemize}
+\item Preporuke kod preklapanja operatora
+\begin{itemize}
+    \item Preklopljeni operatori treba da imaju očekivana značenja
+    \begin{enumerate}
+        \item Ako standardni operator ima bočni efekat, i preklopljeni bi trebao da ga ima
+        \item Ako standardni operator vraća \inlinecode{lvalue}, i preklopljeni bi trebao da ga vraća
+    \end{enumerate}
+    \item Kada se definišu operatori za klasu, treba težiti da njihov skup bude kompletan\\
+    Ako imam definisane \inlinecode{+, =} trebalo bi da definišem i \inlinecode{+=}
+\end{itemize}
+\item Operatorski metodi/globalne prijateljske funkcije
+\begin{itemize}
+    \item Operatorske funkcije mogu biti
+    \begin{enumerate}
+        \item Metodi klase
+        \item Globalne prijateljske funkcije
+    \end{enumerate}
+    \item Kod globalne funkcije, bar 1 parametar mora biti klasnog tipa\\
+    \inlinecode{a.operator@(b)} $\longleftarrow$ Metod klase\\
+    \inlinecode{operator@(a,b)} $\longleftarrow$ Globalna prijateljska funkcija
+    \item Ne možemo imati oba
+\end{itemize}
+\item Ograničenja operatorskog metoda
+\begin{itemize}
+    \item Ako levi operand binarne operacije treba da bude standardnog tipa $\rightarrow$ moramo definisati globalnu funkciju
+    \item Kod operatorskog metoda levi operand je uvek skriveni parametar, i uvek je tipa klase kojoj pripada \\
+    Primer je operacija oduzimanja
+    \item Opreatorski metod ne dozvoljava konverziju levog operanda
+\end{itemize}
+\item Unarni i binarni operatori
+\begin{multicols}{2}
+\begin{itemize}
+    \item Unarni\\
+    \inlinecode{tip operator@() // Metod}\\
+    \inlinecode{tip operator@(X x) // Globalna funkcija}
+    \columnbreak
+    \item Binarni\\
+    \inlinecode{tip operator@(X x\_desno) }\\
+    \inlinecode{tip operator@(X x\_levo, X x\_desno)}
+\end{itemize}
+\end{multicols}
+
+\item Inicijalizacija i dodela vrednosti
+\begin{itemize}
+    \item Inicijalizacija podrazumeva da objekat još ne postoji, dok dodela podrazumeva suprotno
+    \item Inicijalizacija se vrši uvek kada se kreira objekat
+    \item Inicijalizacija poziva konstruktor, a ne operator dodele
+    \item Konstruktor se poziva čak iako je notacija za inicijalizaciju operator \inlinecode=
+    \item Ako je izraz sa desne strane simbola \inlinecode=
+    \begin{enumerate}
+        \item Istog tipa kao objekat koji se kreira, poziva se ili konstruktor kopije, ili premeštajući konstruktor
+        \item Različitog tipa u odnosu na objekat koji se kreira, poziva se konverzioni konstruktor
+    \end{enumerate}
+    \item U oba slučaja može biti pozvan konstruktor sa više paramteara, ako svi ostali parametri imaju podrazumevane vrednosti
+    \item Dodela $\rightarrow$ Izvršavanje izraza sa operatorom dodele \inlinecode=
+    \item Podrazumevano značenje je kopiranje objekta član po član
+    \begin{enumerate}
+        \item Primitivni tipovi $\rightarrow$ kopiranje vrednosti
+        \item Klasni tipovi $\rightarrow$ poziva se operator dodele odgovarajuće klase
+        \item Pokazivački tipovi $\rightarrow$ kopiraće se samo pokazivač, a ne i pokazivana vrednost/objekat. Ako treba kopirati i pokazani objekat mora se preklopiti operator odele (\textit{deep copy})
+    \end{enumerate}
+\end{itemize}
+\item Preklapanje operatora dodele
+\begin{itemize}
+    \item Mora biti nestatički metod
+    \item Ugrađena varijanta vriši plitko kopiranje (\textit{shallow copy})
+    \item Ugrađena varijanta vraća \inlinecode{lvalue}, pa je preporuka da se rezultat vraća po referenci
+    \item Najčešća optimizacija
+    \begin{enumerate}
+        \item Prvo se ispita da nije slučaj poziva \inlinecode{a = a}, jer tada ništa ne radimo (bitno je da se ovo uradi, jer može da dođe do slučajnog brisanja objekta)
+        \item Uništavaju se delovi levog operanda (nije neophodno, pogotovo ako su iste veličine kao i delovi desnog operanda)
+        \item Kopiraju se (ili premeštaju) delovi desnog operanda u levi
+    \end{enumerate}
+    \begin{lstlisting}
+X& X::operator=(const X& x){
+    if(&x != this) { // Proveravamo da li su isti objekat
+    // Formiramo nove delove
+    // Kopiramo sadrzaje iz x
+    }
+    return *this;
+}
+    \end{lstlisting}
+\end{itemize}
+\item Varijante operatora dodele
+\begin{itemize}
+    \item Kopirajuća i premeštajuća verzija
+    \item Razlika samo u efikasnosti, semantički su isti
+    \item Razlika u tipu parametra
+    \begin{enumerate}
+        \item \inlinecode{X\& X::operator=(const X\& x)} $\longleftarrow$ Kopirajući konstruktor
+        \item \inlinecode{X\& X::operator=(X\&\& x)} $\longleftarrow$ Premeštajući konstruktor
+    \end{enumerate}
+    \item Obe verzije imaju ugrađene definicije koje rade plitku kopiju
+    \item Ugrađena kopirajuća se briše ako se definiše\\
+    \boxedimportant[ČUDNO]{
+    \begin{enumerate}
+        \item Premeštajući konstruktor
+        \item Premeštajuća dodela
+    \end{enumerate}
+    }
+    \item Ugrađena premeštajuća dodela se briše ako se definiše
+    \begin{enumerate}
+        \item Kopirajući konstruktor
+        \item Premeštajući konstruktor
+        \item Konstruktor
+        \item Destruktor
+        \item Kopirajuća dodela
+    \end{enumerate}
+    \item \boxedimportant[PREM.?]{Restauracija kopirajućeg sa \inlinecode{=default}}
+    \item Ako u klasi ne postoji premeštajuća dodela, koristi se kopirajuća
+\end{itemize}
+\item Preporuke za operator dodele
+\begin{itemize}
+    \item Ako se za klasu pišu destruktor, konstruktor kopije ili operator dodele, sva je prilika da trea ispisati sve te funkcije
+    \item Ako se za klasu piše operator dodele sva je prilika da treba napisati i kopirajuću i premeštajuću dodelu
+    \item Implementacija
+    \begin{itemize}
+        \item[-] Napraviti privatne metode $\begin{cases}
+        \inlinecode{kopiraj(x)}\\
+        \inlinecode{premesti(x)}\\
+        \inlinecode{brisi(x)}
+        \end{cases}$
+        \item Ovi metodi se koriste na mnogo mesta, pa je zgodno napisati ih samo jednom
+        \item Alternativa - \textit{copy-and-swap} koja objedinjuje dva tipa operatora dodele\\
+        Umesto po referenci, prosledi se kopija desnog operanda na stek, zatim se izvrši razmena objekata i destruktor obriše ostatke levog operanda kada skidamo objekta sa steka
+    \end{itemize}
+    \begin{lstlisting}
+/*...*/
+int main(){
+    X x = X("OOP");        // X(const char*); Konverzioni konstruktor
+      y = x,               // X(const X&); Konstruktor kopije
+      z = X("me cini");    // X(const char*); X(const X&&); Premestajuci konstruktor
+    x = y;                 // operator=(const X&); Kopirajuca dodela
+    y = X("tuznim");       // X(const char*); operator=(const X&&); Premestajuca dodela
+/* Paziti na optimizacije kompajlera. Nekad kompajler izvrsi nesto sto ne ocekujemo*/    
+ 
+}
+    \end{lstlisting}
+\end{itemize}
+\item Preklapanje operator \inlinecode{++} i \inlinecode{--}
+\begin{itemize}
+    \item Problem nastaje jer postoje i prefiksna i postfiksna verzija
+    \begin{multicols}{2}
+    \item Prefiksna\\
+    \inlinecode{T\& operator@@()}\\
+    \inlinecode{T\& operator@@(T\&)}
+    \columnbreak
+    \item Postfiksna\\
+    \inlinecode{T operator@@(int)}\\
+    \inlinecode{T operator@@(T\&, int)}
+    \end{multicols}
+    \item Za poziv postfiksne, parametar tipa int ima vrednost 0
+    \item Može i \inlinecode{t.operator@@(k)} ili \inlinecode{operator@@(t, k)}, gde je k $\neq$ 0, ali je besmisleno
+\end{itemize}
+\item Preklapanje operatora \inlinecode{[]}
+\begin{itemize}
+    \item Mora biti nestatički metod, i ne može biti globalna funkcija
+    \item Kod standardnog indeksiranja indeksni izraz mora biti celobrojnog tipa
+    \item Kod preklopljenog indeksiranja indeksni izraz može biti proizvoljnog tipa\\
+    \inlinecode{X[ind] = x.operator[](ind)}
+    \item Preklapanje omogućava \inlinecode{o[i]}, gde je o objekat date klase
+    \item Primer primene $\rightarrow$ kontejner za niz koji prati maksimalni i minimalni indeks i prati prekoračenja
+    \item Dve varijante
+    \begin{enumerate}
+        \item \inlinecode{T\& operator[](ind) // Mozemo da menjamo objekat na ind}
+        \item \inlinecode{const T\& operator[](ind) const // Mozemo samo da citamo objekat na ind}
+    \end{enumerate}
+    \item Preklopljeni operator \inlinecode{[]} nije indeksiranje, već koristi notaciju indeksiranja
+    \item Deluje na objekat kalse, a ne na niz objekata
+    \item Takođe, ne radi pokazivačka aritmetika, što je i logično
+    \item Objekat je kolekcija elemenata, i operatorom \inlinecode{[]} pristupamo nekoj komponenti
+\end{itemize}
+\item Preklapanje operatora \inlinecode{()}
+\begin{itemize}
+    \item Mora biti nestatički metod, i ne sme biti globalna funkcija
+    \item Proizvoljan broj parametara proizvoljnog tipa\\
+    \inlinecode{f(a1, a2, ..., an) = f.operator()(a1, a2, ..., an)}\\
+    \inlinecode{o(a1, a2, ..., an) // o je objekat neke klase}
+    \item Klasa sa \inlinecode{()} operatorom $\rightarrow$ funkcijska klasa
+    \item Objekat funkcijske klase $\rightarrow$ funkcijski objekat
+\end{itemize}
+\item Preklapanje operatora \inlinecode{->}
+\begin{itemize}
+    \item Mora biti nestatički metod, i ne sme biti globalna funkcija
+    \item Bez parametara iako je binarni operator\\
+    \inlinecode{o->clan = (o.operator->())->clan}
+    \item Ili vraća neki pokazivač na objekat klase koja sadrži \inlinecode{clan}, ili objekat (ili referencu) klase za koju je takođe definisan operator \inlinecode{->}
+    \item Jedna od primena su pametni pokazivači
+    \begin{lstlisting}
+// Pratimo koliko puta smo pristupili odredjenom objektu
+struct X { int val; };
+class Xptr {
+    X* p; int bp;
+public:
+    Xptr(X *px): p(px), bp(0) { }
+    X& operator*() { bp++; return *p;}
+    X* opereator->() { bp++; return p;}
+};
+int main() {
+    X x; Xptr pp=&x;
+    (*pp).val = 1;
+    int i = pp->val;
+
+}
+    \end{lstlisting}
+\end{itemize}
+\end{xitemize}
 
 \end{document}
