@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english,serbian]{babel}
 \usepackage[fleqn]{mathtools}
+\usepackage[table,xcdraw]{xcolor}
 \usepackage{marginnote}
 \usepackage{tikz}
 \usepackage{relsize}
@@ -14,6 +15,8 @@
 \usepackage[bottom = 0.5in]{geometry}
 \usepackage{changepage}
 \usepackage{centernot}
+\usepackage{tikz-uml}
+\usepackage{multirow}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -118,6 +121,7 @@
 Ako nadjete greske recite mi odmah da ispravim
 Nebitno da li su slovne ili sam nesto pogresno lupio. Mozete i sami izmeniti na https://github.com/veljkoselakovic/OOP1 i napraviti merge request
 \newpage
+
 
 \begin{itemize}
     \item \textbf{UML} - \textit{Unified Modeling Language} (Kasnije predmet \textit{Projektovanje softvera}, 5. semestar)
@@ -1870,7 +1874,52 @@ alfa.*pc = 2; // alfa.b=2;
 beta->*pc = 2; // beta->b=2;
     \end{lstlisting}
 \end{itemize}
-
+\item UML
+\begin{itemize}
+    \item Grafička notacija za modeliranje\\\\
+    \begin{figure}[h]
+        \begin{tikzpicture}
+    \begin{umlpackage}{UML - OSNOVE}
+    \begin{umlpackage}[y=-1]{KLASA}
+    \umlclass[]{TackaRavni}{
+    x : double\\y : double
+    }{
+    rastojanje(T : Tacka) : double
+    }
+    \end{umlpackage}
+    \begin{umlpackage}[x=-1.4, y=-4]{OBJEKAT}
+    
+    \begin{umlseqdiag}
+    \umlobject[class=TackaRavni]{T}
+    \end{umlseqdiag}
+    \end{umlpackage}
+    \begin{umlpackage}[x=7, y=0.8]{RELACIJE}
+    \begin{umlpackage}{ASOCIJACIJA}
+    \umlclass[]{Fakultet}{}{}
+    \umlclass[x=4]{Osoba}{}{}
+    \end{umlpackage}
+    \begin{umlpackage}[x=-0.25,y=-2.5]{ZAVISNOST}
+    \umlclass[]{Krug}{}{}
+    \umlclass[x=4.35]{Boja}{}{}
+    \end{umlpackage}
+    \begin{umlpackage}[y=-5]{AGREGACIJA}
+    \umlclass[]{Kvadrat}{}{}
+    \umlclass[x=4]{Tacka}{}{}
+    \end{umlpackage}
+    \begin{umlpackage}[x=0.2, y=-7.5]{KOMPOZICIJA}
+    \umlclass[]{Automobil}{}{}
+    \umlclass[x=4]{Tocak}{}{}
+    \end{umlpackage}
+    \end{umlpackage}
+    \end{umlpackage}
+    \umlassoc[geometry=-|-, arg1=1, pos1=0.3, arg2=1..N,pos2=1, align2=left]{Fakultet}{Osoba}
+    \umlimport[geometry=|-, name=import]{Krug}{Boja}
+    \umlaggreg[arg=centar , mult1=1..*, pos1= 0.2, mult2=1, pos2=0.8]{Kvadrat}{Tacka}
+    \umlunicompo[geometry=-|, mult1=1, pos1=0.2, mult2=4, pos2=0.6]{Automobil}{Tocak}
+    \end{tikzpicture}
+    \end{figure}
+    
+\end{itemize}
 \end{xitemize}
 \begin{center}
     SI KOLOKVIJUM 1
@@ -2123,7 +2172,7 @@ int main(){
         \item \inlinecode{const T\& operator[](ind) const // Mozemo samo da citamo objekat na ind}
     \end{enumerate}
     \item Preklopljeni operator \inlinecode{[]} nije indeksiranje, već koristi notaciju indeksiranja
-    \item Deluje na objekat kalse, a ne na niz objekata
+    \item Deluje na objekat klase, a ne na niz objekata
     \item Takođe, ne radi pokazivačka aritmetika, što je i logično
     \item Objekat je kolekcija elemenata, i operatorom \inlinecode{[]} pristupamo nekoj komponenti
 \end{itemize}
@@ -2160,6 +2209,448 @@ int main() {
 
 }
     \end{lstlisting}
+\end{itemize}
+\item Preklapanje operator \inlinecode{(tip)}
+\begin{itemize}
+    \item Mora biti nestatički metod, i ne sme biti globalna prijateljska funkcija
+    \item Drugi način za konverziju klasnih tipova\\
+    (Prvi je pomoću konstruktora konverzije)
+    \item Unarni operator \inlinecode{operatorT()}
+    
+\item[]\begin{enumerate}
+        \item Konverzija tipa klase koje je objekat u tip T
+        \item T može biti standardni, pokazivački ili klasni tip
+    \end{enumerate} 
+    \item Nema parametara
+    \item Tip rezultata ne sme da bude naveden u deklaraciji/definiciji jer se podrazumeva na osnovu imena
+    \item Pozivanje
+    \begin{enumerate}
+        \item \inlinecode{T(x), (T)x} $\iff$ \inlinecode{X.operatorT()} 
+        \item \inlinecode{static\_cast<T>(x)}
+    \end{enumerate}
+    \item Razlike između konstruktora konverzije i preklopljenog operatora
+    \begin{enumerate}
+        \item Može da se koristi za T koje je standardni tip
+        \item Operand x mora biti objekat klase X, odnosno ne može biti primitivan tip
+    \end{enumerate}
+    \item T(x) ne može da se koristi ako je tip sa većim brojem reči\\
+    \inlinecode{unsigned long (x)} $\neq$ \inlinecode{(unsigned long) x}
+    \item Konverzija može biti i implicitna
+    \item Ako ne želimo implicitnu konverziju dodajemo \inlinecode{explicit}
+    \item Konverzija se primenjuje automatski, ako je izbor jednoznačan
+    \begin{enumerate}
+        \item Ako imamo konstruktor konverzije i \inlinecode{operatorT}, t=x X
+        \item Ako su definisane konverzije T(x), X(t) i \inlinecode{operator+}, x+t X
+    \end{enumerate}
+    \item Pri prenosu paramtera po referenci, rezultat konverzije stvarnog argumenta je privremeni objekat, pa se u funkciji prenosi njegova adresa, i izmene u funkciji se odnose samo na taj objekat
+    \begin{lstlisting}
+class X {
+public:
+    operator int() { return 1; }
+    explicit operator double() { return 2; }
+};
+/*...*/
+int a=X();                  // a == 1
+int b = (int) X();          // b == 1
+double c = (double) X();    // c == 2.0
+double d = X();             // d == 1.0
+    \end{lstlisting}
+\end{itemize}
+\item Preklapanje \inlinecode{new} i \inlinecode{delete}
+\begin{itemize}
+    \item Preuzimanje kontrole nad alokacijom memorije
+    \item Oba metoda su statička, čak i ako nisu eksplicitno tako deklarisane
+    \item Pozivaju se za objekat koji u datom trenutku ne postoji
+    \item Unutar tela ovih funkcija
+    \begin{enumerate}
+        \item Ne treba eksplicitno pozivati konstruktor/destruktor
+        \item Ove operacije se pozivaju implicitno pre (kod \inlinecode{new}) ili posle (kod \inlinecode{delete})
+    \end{enumerate}
+    \item Služe samo da rezervišu ili oslobode prostor za objekat
+\end{itemize}
+\item Preklapanje \inlinecode{new}
+\begin{itemize}
+    \item \inlinecode{void* operator new (size\_t sz, T1 t, ..., TN tn)}\\
+    \inlinecode{void* operator new[](size\_t sz, T1 t, ..., TN tn)}
+    \item \inlinecode{size\_t} je celobrojni tip definisan u \inlinecode{<stddef.h>} (C), odnosno u \inlinecode{<cstddef>} (C++)
+    \item Parametar \inlinecode{sz} daje veličinu prostora koji treba alocirati u bajtima
+    \item Argument za \inlinecode{sz} je \inlinecode{sizeof(T)}, i formira se na osnovu tipa T
+    \item Opciona lista izraza je inicijalizator
+    \item \inlinecode{operator new} vrati pokazivač na alocirani prostor
+    \item Klasa može imati više preklopljenih \inlinecode{new}
+    \begin{lstlisting}
+new (arg2, ..., argN) T(izraz, ..., izraz)
+new (arg2, ..., argN) T[duzina]
+    \end{lstlisting}
+\end{itemize}
+\item Preklapanje \inlinecode{delete}
+\begin{itemize}
+    \item \inlinecode{velicina} određuje prostoro koji treba osloboditi u bajtovima
+    \item Ako ga nema, funkciaj mora sama da odredi veličinu na osnovu ranije alokacije
+    \item Ne vraća rezultat
+    \item Samo po 1 \inlinecode{delete} po klasi za podatak i niz
+    \begin{lstlisting}
+void operator delete (void* pokazivac);
+void operator delete (void* pokazivac, size_t velicina);
+void operator delete[] (void* pokazivac);
+void operator delete[] (void* pokazivac, size_t velicina);
+    \end{lstlisting}
+\end{itemize}
+\item Dohvatanje ugrađenih \inlinecode{new} i \inlinecode{delete}
+\begin{itemize}
+    \item Eksplicitno $\rightarrow$ korišćenjem \inlinecode{::}
+    \item Implicitno $\rightarrow$ samo za druge tipove
+    \item \inlinecode{new} i \inlinecode{delete} ne mogu biti virtuelni, ali se nasleđuju normalno
+    \begin{lstlisting}
+#include <cstddef>
+using namespace std;
+class XX {
+public:
+    void* operator new (size_t sz) { return new char [sz]; } // ugradjeni new
+    void operator delete (void* p) { delete [] p; } // koristi se ugradjeni delete
+};
+    \end{lstlisting}
+\end{itemize}
+\item Standardni U/I tokovi
+\begin{itemize}
+    \item Kao ni C, ni C++ nema ugrađene U/I naredbe i realizuju se pomoću standardne biblioteke
+    \item Standardna biblioteka C++ je napisana u duhu OOP-a
+    \item Mogu se koristiti i C funkcije (\inlinecode{scanf, printf}), ali nije preporučljivo
+    \item C++ biblioteka je \inlinecode{<iostream>}
+    \item Dve osnovne klase
+    \begin{enumerate}
+        \item \inlinecode{istream} - \textit{input stream}
+        \item \inlinecode{ostream} - \textit{output stream}
+    \end{enumerate}
+    \item Iz navedenih klasa izvedene su i klase \inlinecode{ifstream} i \inlinecode{ofstream} za rad sa datotekama
+    \item Pristup datotekama isključivo preko klasa
+\end{itemize}
+\item Standardni objekti i operacije za U/I
+\begin{itemize}
+    \item Dva globalna objekta
+    \begin{enumerate}
+        \item \inlinecode{cin} iz \inlinecode{istream} - obično povezan sa tastaturom
+        \item \inlinecode{cout} iz \inlinecode{ostream} - obično povezan sa monitorom
+    \end{enumerate}
+    \item Preklopljeni su operatori \inlinecode{<<} i \inlinecode{>>} za sve standardne tipove\\
+    \inlinecode{istream\& operator>>(istream\& is, T\& t);}\\
+    \inlinecode{ostream\& operator<<(ostream\& os, const T\& t);}
+    \item Rezultati su reference pa samim tim dozvoljavaju \textbf{ulančavanje}
+\end{itemize}
+\item Korišćenje operatora \inlinecode{<<} i \inlinecode{>>}
+\begin{itemize}
+    \item Vraćaju referencu na levi operand $\rightarrow$ višestruki U/I u istoj naredbi
+    \item Sleva-udesno asocijativni $\rightarrow$ podaci se ispisuju/učitavaju u prirodnom redosledu
+    \item Za jednostavne U/I operacije
+\end{itemize}
+\item Preklapanje operatora \inlinecode{<<} i \inlinecode{>>}
+\begin{itemize}
+    \item Mora uvek da se koristi globalna prijateljska funkcija zbog toga što je levi operand tipa \inlinecode{istream\&} ili \inlinecode{ostream\&}, a ne trenutni objekat klase
+    \begin{lstlisting}
+#include <iostream>
+using namespace std;
+class Kompleksni {
+    double real, imag;
+    friend ostream& oeprator<<(ostream&, const Kompleksni&);
+public: /* ... */
+};
+ostream& operator<<*ostream& os, const Kompleksni& c){
+    return os<<"("<<c.real<<", "<<c.imag<<")";
+}
+void main() {
+    Kompleksni c(0.5, 0.1);
+    cout<<"c="<<c<<endl; // ISPIS: c=(0.5,0.1)
+}
+    \end{lstlisting}
+\end{itemize}
+\item Operatori za nabrajanja
+\begin{itemize}
+\begin{multicols}{2}
+\item Celobrojni tip, ali su dozvoljene
+    \begin{enumerate}
+        \item Operacije dodele istom tipu nabrajanja
+        \item Operacija konverzije u celobrjnu vrednost - može i implicitno (osim za nabrajanja sa ograničenim dosegom)
+        \item Operacija konverzije iz celobrojne vrednosti - samo eksplicitno
+    \end{enumerate}
+    \item Dozvoljeno preklapanje operatora koji se ne preklapaju kao metodi
+    \begin{enumerate}
+        \item Ne može \inlinecode{=, [], (), ->, (tip), new, delete}
+        \item Ugrađeni \inlinecode{= i (tip)} zadovoljavaju realne potrebe, ostali nemaju mnogo smisla
+    \end{enumerate}
+    \columnbreak
+    \begin{lstlisting}
+enum Dani { PO, UT, SR, CE, PE, SU, NE};
+inline Dani operator+(Dani d, int k) {
+    k=(int(d)+k)%7;
+    if(k<0) k+=7;
+    return Dani(k);
+}
+inline Dani& operator+=(Dani& d, int k) {
+    return d=d+k;
+}
+inline Dani& operator++(Dani& d) {
+    return d=Dani(d<NE?int(d)+1:PO);
+}
+inline Dani operator++(Dani& d, int) {
+    Dani e(d);
+    ++d;
+    return e;
+}
+    \end{lstlisting}
+\end{multicols}
+    
+\end{itemize}
+\end{xitemize}
+\begin{center}
+ER KOLOKVIJUM
+\end{center}
+\hzline
+\section{Izvođenje klasa}
+\begin{xitemize}
+\item Pojam specijalizacije opšteg
+\begin{itemize}
+    \item Jedna klasa može biti podvrsta neke druge klase
+    \item Klasa B je specijalni slučaj (\textit{a-kind-of}) klase A
+    \item Objekat klase B je (\textit{is-a}) i objekat klase A
+\end{itemize}
+\item Izvođenje i nasleđivanje
+\begin{itemize}
+    \item Objekti klase B imaju sve osobine klase A, sa još nekim, specifičnim, osobinama
+    \item Specijalnija klasa B se izvode iz generalnije (opštije) klase A
+    \item Klasa B nasleđuje
+    \begin{enumerate}
+        \item Strukturne karakteristike (atribute)
+        \item Karakteristike ponašanja (metode)
+    \end{enumerate}
+    \item Pored nasleđenih ima i svoje čanove
+    \item Nasleđivanje (\textit{inheritance}) ili generalizacija/specijalizaicija\\\\
+    \begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+    \begin{umlpackage}{UML DIJAGRAM}
+    \umlclass[]{A}{}{}
+    \umlclass[x=3]{B}{}{}
+    \umlinherit[]{B}{A}
+    \end{umlpackage}
+    \end{tikzpicture}
+    \caption{Klasa B je izvedena iz klase A} 
+    \end{figure}
+    \item Termini
+    % Mrzelo me da pravim tabelu iskren da budem
+    \item[] \hspace{0.8cm}\textbf{A} \hspace{1.8cm}\textbf{B}
+    \begin{enumerate}
+        \item \textit{base} \hspace{1.1cm} \textit{derived}
+        \item \textit{superclass} \hspace{0.32cm} \textit{subclass}
+        \item \textit{parent} \hspace{1cm} \textit{child}
+    \end{enumerate}
+    \item Jezik je \textbf{objektno-orijentisan} ako podržava nasleđivanje, a \textbf{objektno-baziran} u suprotnom
+    \item Pri izvođenju nije potrebno menjati postojeće klase
+    \item Postojeće klase se \textbf{ne} prevode ponovo
+\end{itemize}
+\item Definisanje izvedene klase\\
+\inlinecode{class ime: ime\_osnovne \{ ... \};}
+\begin{itemize}
+    \item Ako postoji samo jedna osnovna klasa $\rightarrow$ \textbf{jednostruko izvođenje}
+    \item Ako postoji više osnovnih klasa $\rightarrow$ \textbf{višestruko izvođenje}
+    \item \boxedimportant[NIJE VIŠESTRUKO]{Izvođenje može biti i u više koraka, gde je izvedena klasa osnovna klasa za sledeće izvođenje}
+\end{itemize}
+\item Konačna klasa
+\begin{itemize}
+    \item Modifikator \inlinecode{final} $\rightarrow$ dalje se ne može izvoditi
+    \item \inlinecode{final} nije rezervisana reč, može biti i identifikator ali se ne preporučuje
+\end{itemize}
+\begin{multicols}{2}
+\item Primer izvođenja
+\begin{itemize}
+    \item Objekat izvedene klase sadrži
+    \begin{enumerate}
+        \item Bezimeni podobjekat osnovne klase koji sadrži nasleđene članove
+        \item Specifične čanove navedene u definiciji izvedene klase
+    \end{enumerate}
+
+\end{itemize}
+\item Pristup nasleđenim članovima
+\begin{itemize}
+    \item Javnim članovima osnovne klase se pristupa isto kao i članovima izvedene klase
+\end{itemize}
+\columnbreak
+\begin{lstlisting}
+class Osnovna { private: int i;
+public: void f();
+};
+class Izvedena: public Osnovna { private: int j;
+public: void g();
+};
+int main() {
+    Osnovna b; Izvedena d;
+    b.f();
+    b.g(); // ERROR: g je metod izvedene
+    d.f(); d.g(); // OK
+}
+    \end{lstlisting}
+\end{multicols}
+\item Konstruktor, destruktor, \inlinecode{operator=}
+\begin{itemize}
+    \item Izvedena klasa ih \textbf{ne} nasleđuje
+    \item Kao i za osnovne klase, postoje ugrađeni
+    \begin{enumerate}
+        \item Podrazumevani konstruktor praznog tipa
+        \item Kopirajući konstruktor koji kopira član po član (plitka kopija)
+        \item Premeštajući konstruktor koji kopira član po član
+        \item Destruktor praznog tela
+        \item Kopirajući operator dodele koji vrši dodelu kopiranjem, član po član
+        \item Premeštajući operator dodele koji vrši dodelu premeštanjem, član po član
+    \end{enumerate}
+\end{itemize}
+\item Prava pristupa
+\begin{itemize}
+    \item Članovi izvedene klase imaju prava pristupa javnim članovima osnovne klase, a nemaju pristup privatnim
+    \item  Posebno pravo pristupa - \textbf{zaštićeno}\\
+    \inlinecode{protected:}
+    \item Označava de klase kojem imaju pravo pristupa metode te i izvedenih klasa - \textit{zašto te?}
+    \item Zaštićenim članovima može da se pristupi iz metoda izvedene klase kao nasleđenim članovima
+    \begin{lstlisting}
+class Osnovna {
+            int pb;
+protected:  int zb;
+public:     int jb;
+};
+class Izvedena : public Osnovna {
+public:
+    void m(int x) {
+        jb=zb=x;    // OK
+        pb=x;       // ERROR: privatni clan
+        Osnovna c;
+        o.zb=x;     // ERROR: ne moze preko osnovne
+    }
+};
+void f(){
+    Osnovna b;
+    b.pb=1; // ERROR: privatan clan
+    b.zb=1; // ERROR: zasticeni clan
+    b.jb=1; // OK
+}
+    \end{lstlisting}
+\end{itemize}
+\item Načini izvođenja
+\begin{multicols}{2}
+
+\begin{itemize}
+    \item Određuje ga modifikator ispred imena osnovne klase
+    \item Može biti
+    \begin{enumerate}
+        \item Javno \inlinecode{public}
+        \item Zaštićeno \inlinecode{protected}
+        \item Privatno \inlinecode{private}
+    \end{enumerate}
+    \item Kaže se i za osnovnu klasu da je javna, zaštićena ili privatna
+    \item Podrazumevano izvođenje je privatno
+    \item Način izvođenja određuje nasleđivanje prava pristupa
+    \item Određu se se stepen kontrole pristupa članovima osnovne klase preko objekta izvedene klase
+    \item Objekat izvedene klase može biti osnovna klasa u dalje izvođenju
+    \item Ne utiče na pravo pristupa iz metoda dotične izvedene klase
+    \begin{table}[ht]
+    \begin{tabular}{|l|lll}
+    \hline
+    \multicolumn{1}{|c|}{}                                     & \multicolumn{3}{c|}{\textbf{član osnovne klase}}                                                                       \\ \cline{2-4} 
+    \multicolumn{1}{|c|}{\multirow{-2}{*}{\textbf{Izvođenje}}} & \multicolumn{1}{l|}{\textbf{javni}} & \multicolumn{1}{l|}{\textbf{zaštićeni}} & \multicolumn{1}{l|}{\textbf{privatan}} \\ \hline
+    \textbf{javno}                                             & \cellcolor[HTML]{DAE8FC}javni       & \cellcolor[HTML]{DAE8FC}zaštićen        & \cellcolor[HTML]{DAE8FC}privatan       \\ \cline{1-1}
+    \textbf{zaštićeno}                                         & \cellcolor[HTML]{DAE8FC}zaštićen    & \cellcolor[HTML]{DAE8FC}zaštićen        & \cellcolor[HTML]{DAE8FC}privatan       \\ \cline{1-1}
+    \textbf{privatno}                                          & \cellcolor[HTML]{DAE8FC}privatan    & \cellcolor[HTML]{DAE8FC}privatan        & \cellcolor[HTML]{DAE8FC}privatan       \\ \cline{1-1}
+    \end{tabular}
+    \end{table}
+    
+\end{itemize}
+\columnbreak
+\end{multicols}
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|lll}
+    \hline
+    \multicolumn{1}{|c|}{}                                     & \multicolumn{3}{c|}{\textbf{član osnovne klase}}                                                                       \\ \cline{2-4} 
+    \multicolumn{1}{|c|}{\multirow{-2}{*}{\textbf{Izvođenje}}} & \multicolumn{1}{l|}{\textbf{javni}} & \multicolumn{1}{l|}{\textbf{zaštićeni}} & \multicolumn{1}{l|}{\textbf{privatan}} \\ \hline
+    \textbf{javno}                                             & \cellcolor[HTML]{DAE8FC}javni       & \cellcolor[HTML]{DAE8FC}zaštićen        & \cellcolor[HTML]{DAE8FC}privatan       \\ \cline{1-1}
+    \textbf{zaštićeno}                                         & \cellcolor[HTML]{DAE8FC}zaštićen    & \cellcolor[HTML]{DAE8FC}zaštićen        & \cellcolor[HTML]{DAE8FC}privatan       \\ \cline{1-1}
+    \textbf{privatno}                                          & \cellcolor[HTML]{DAE8FC}privatan    & \cellcolor[HTML]{DAE8FC}privatan        & \cellcolor[HTML]{DAE8FC}privatan       \\ \cline{1-1}
+    \end{tabular}
+    \end{table}
+\item Eksplicitna promena prava pristupa
+\begin{itemize}
+    \item Može eksplicitno da se promeni pravo pristupa nasleđenom članu
+    \begin{enumerate}
+        \item Da se uveća u odnosu na originalno\\
+        (zaštićeni postaje javni)
+        \item Može da se restaurira na originalnu koje je umanjeno načinom izvođenja
+        \item Delimično da se restaurira
+        \item Da se umanji u odnosu na originalno
+    \end{enumerate}
+    \item Ne može da se promeni pravo pristupa privatnom članu osnovne klase
+    \item Postiže se uvozom člana u odgovarajuću sekciju izvedene klase\\
+    \inlinecode{using klasa::clan}
+    \item Može i bez \inlinecode{using}, ali izbegavati
+    \begin{multicols}{2}
+    \begin{lstlisting}
+class O {
+            int pb;
+protected:  int z1b, z2b;
+public:     int j1b, j2b;
+};
+class PI: O {
+public:
+    using O::j1b;   
+    // Vracanje starog prava pristupa
+    using O::z1b;   
+    // Povecanje prava pristupa
+    PI() { z2b = 1; }
+protected:
+    using O::j2b;   
+    // Delimicno vracanje prava pristupa
+};
+\end{lstlisting}
+    \columnbreak
+        \begin{lstlisting}
+class IPI: public PI {
+public:
+    IPI() {
+        j1b=0;      // OK
+        j2b=0;      // OK
+        z1b=0;      // OK
+        z2b=0;      // ERROR
+    }
+};
+int main() {
+    PI pi;
+    pi.j1b=0;       // OK
+    pi.j2b=0;       // ERROR: zasticen clan
+    pi.z1b=0;       // OK
+    pi.z2b=0;       // ERROR: privatni clan
+}
+    \end{lstlisting}
+    \end{multicols}
+  
+\end{itemize}
+\item Razlika između privatnog i javnog izvođenja
+\begin{itemize}
+    \item Javno izvođenje realizuje koncept nasleđivanja
+    \begin{enumerate}
+        \item \textbf{B je vrsta A} (\textit{a-kind-of})
+        \item Izvedena klasa zadržava interfejs roditelja
+        \item Objekat izvedene klase može da zameni objekat osnovne
+        \item Jedino pravo nasleđivanje
+    \end{enumerate}
+    \item Privatno izvođenje realizuje koncept sadržanja
+    \begin{enumerate}
+        \item \textbf{A je deo B} (\textit{a-part-of})
+        \item Semantički slično kao kad B sadrži atribut tipa A
+        \item Nije nasleđen interfejs jer sve nasleđeno postaje privatno
+        \item Objekat izvedene klase ne može da zameni objekat osnovne
+    \end{enumerate}
+    \item Zaštićeno izvođenje
+    \begin{enumerate}
+        \item Unutar izvedene klase $\rightarrow$ koncept nasleđivanja
+        \item Van izvedene klase $\rightarrow$ koncept sadržanja
+    \end{enumerate}
+    
 \end{itemize}
 \end{xitemize}
 
