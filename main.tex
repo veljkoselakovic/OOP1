@@ -2210,7 +2210,7 @@ int main() {
 }
     \end{lstlisting}
 \end{itemize}
-\item Preklapanje operator \inlinecode{(tip)}
+\item Preklapanje operatora \inlinecode{(tip)}
 \begin{itemize}
     \item Mora biti nestatički metod, i ne sme biti globalna prijateljska funkcija
     \item Drugi način za konverziju klasnih tipova\\
@@ -2567,7 +2567,7 @@ void f(){
     \centering
     \begin{tabular}{|l|lll}
     \hline
-    \multicolumn{1}{|c|}{}                                     & \multicolumn{3}{c|}{\textbf{član osnovne klase}}                                                                       \\ \cline{2-4} 
+    \multicolumn{1}{|c|}{}                                     & \multicolumn{3}{c|}{\textbf{Član osnovne klase}}                                                                       \\ \cline{2-4} 
     \multicolumn{1}{|c|}{\multirow{-2}{*}{\textbf{Izvođenje}}} & \multicolumn{1}{l|}{\textbf{javni}} & \multicolumn{1}{l|}{\textbf{zaštićeni}} & \multicolumn{1}{l|}{\textbf{privatan}} \\ \hline
     \textbf{javno}                                             & \cellcolor[HTML]{DAE8FC}javni       & \cellcolor[HTML]{DAE8FC}zaštićen        & \cellcolor[HTML]{DAE8FC}privatan       \\ \cline{1-1}
     \textbf{zaštićeno}                                         & \cellcolor[HTML]{DAE8FC}zaštićen    & \cellcolor[HTML]{DAE8FC}zaštićen        & \cellcolor[HTML]{DAE8FC}privatan       \\ \cline{1-1}
@@ -2591,9 +2591,9 @@ void f(){
     \begin{multicols}{2}
     \begin{lstlisting}
 class O {
-            int pb;
-protected:  int z1b, z2b;
-public:     int j1b, j2b;
+             int pb;
+protected:   int z1b, z2b;
+public:      int j1b, j2b;
 };
 class PI: O {
 public:
@@ -2650,8 +2650,810 @@ int main() {
         \item Unutar izvedene klase $\rightarrow$ koncept nasleđivanja
         \item Van izvedene klase $\rightarrow$ koncept sadržanja
     \end{enumerate}
+\end{itemize}
+\item Sakrivanje članova
+\begin{itemize}
+    \item Redefinisanje identifikatora člana osnovne klase u izvedenoj pritom sakrivajući originalni
+    \item  Pristup originalu:\\
+    \inlinecode{osnovna\_klasa::clan}
+    \item Ako u izvedenoj klasi napišemo neki metod koji ima ime kao neki metod u osnovnoj klasi
+    \begin{enumerate}
+        \item Takav metod sakriva sve nasleđene metode istog imena
+        \item Iz metoda izvedene klase se ne može pristupiti skrivenim metodama
+        \item Nasleđeni sakriveni metodi se ne mogu pozivati ni za objekte izvedene klase (osim preko pokazivača na osnovni tip objekta)
+    \end{enumerate}
+\end{itemize}
+\item Uvoz članova
+\begin{itemize}
+    \item U izvedenoj klasi sve sakrivene metode treba
+    \begin{enumerate}
+        \item Redefinisati
+        \item Restaurirati
+    \end{enumerate}
+    \item Nije dobro da izvedena klasa sadrži samo neke metode osnovne
+    \begin{enumerate}
+        \item Nije pravo nasleđivanje
+        \item Korisnik klase očekuje isti ili prošireni interfejs
+    \end{enumerate}
+    \item Uvoz \\
+    \inlinecode{using::osnovna\_klasa::ime\_metoda}
+    \item Nisu vidljivi samo metodi osnovne klase sa istim potpisom kao izvedena klasa
+    \item Ne može da se restaurira vidljivost pojedinačnog metoda osnovne klase
+    \begin{multicols}{2}
+\begin{lstlisting}
+class O { 
+public:
+    int a=1;
+    void m1();
+    void m1(int);
+    void m2();
+    void m2(int);
+};
+class I: public O {
+public:
+    using O::m2;
+    int a=2;
+    void m1(int);
+    void m2(int);
+    void m(){
+    int x=a;        // x=I::a
+    int y=O::a;     // x=O::a
+    m1();           // ERROR
+\end{lstlisting}
+\columnbreak
+\begin{lstlisting}
+    m1(x);          // I::m1(int)
+    O::m1();        // O::m1();
+    O::m1(y);       // O::m1(int);
+    m2();           // O::m2();
+    m2(x);          // I::m2(int)
+    O::m2(y);       // O::m2(int);
+} };
+void f(){
+    I i;
+    int p=i.a;      // I::a
+    int q=i.O::a;   // O::a
+    i.m1();         // ERROR
+    i.O::m1();      // O::m1()
+    i.m1(p);        // I::m1(int)
+    i.O::m1(q);     // O::m1(int)
+    i.m2();         // O::m2()
+    i.m2(p);        // I::m2(int)
+    i.O::m2(q);     // O::m2(int)
+\end{lstlisting}
+\end{multicols}
+\end{itemize}
+\item Uvoz konstruktora
+\begin{itemize}
+    \item Konstruktori osnovne klase se ne nasleđuju
+    \item Može se izvršiti uvoz svih konstruktora osnovne klase\\
+    \inlinecode{using ime\_klase::ime\_klase}
+    \item Na taj način se generišu konstruktori izvedene sa istim potpisima
+    \item Generisani konstruktor izvedene klase imaju prazno telo, samo pozivaju konstruktore osnovne sa istim potpisom
+      % ne znam...
+    
+
+\begin{lstlisting}
+class A { public: A(int i){...} };
+class B: public A {public: using A::A; }
+B b(1); // poziva se A::A(1)    
+\end{lstlisting}
+\end{itemize}
+\item Izvođenje struktura
+\begin{itemize}
+    \item Strukture su ravnopravne sa klasama
+    \begin{enumerate}
+        \item Izvođenje strukture iz klase/strukture - javno
+        \item Izvpđenje klase iz strukture - privatno
+    \end{enumerate}
+    \item Unije se ne mogu izvoditi, niti se može izvoditi iz njih
+    \begin{lstlisting}
+struct OS { };
+class OK { };
+class IKS: OS{ };       // privatno izvodjenje
+class IKK: OK{ };       // privatno izvodjenje
+struct ISK: OK{ };      // javno izvodjenje
+struct ISS: OS{ };      // javno izvodjenje
+    \end{lstlisting}
+\end{itemize}
+\item Konstruktori i destruktori
+\begin{itemize}
+    \item Prilikom kreiranja objekata izvedene klase poziva se konstruktor te klase, ali i konstruktor osnovne klase
+    \item Analogno za uništavanje objekata (ovo se ne odnosi na redosled, već samo da se obe operacije izvršavaju)
+    \item Prenos parametara u konstruktor osnovne klase
+    \begin{enumerate}
+        \item U listu inicijalizatora konstruktora izvedene klase moguće je upisati i inicjalizator osnovne klase
+        \item Inicijalizator osnovne klase se sastoji od imena klase i argumenata poziva konstruktora
+    \end{enumerate}
+    \item Nije moguće vršiti inicijalizaciju pojedinih nasleđenih atributa
+\end{itemize}
+\item Redosled konstrukcije
+\begin{itemize}
+    \item Pri kreiranju objekta izvedene klase 
+    \begin{enumerate}
+        \item Inicijalizuje se podobjekat osnovne klase
+        \begin{itemize}
+            \item[-] Pozivom odgovarajućeg konstruktora osnovne klase
+            \item[-] U slučaju višestrukog izvođenja, inicijalizacija po redosledu u definiciji, a ne u listi inicijalizatora
+        \end{itemize}
+        \item Inicijalizuju se specifični atributi
+        \begin{itemize}
+            \item[-] Po redosledu navođenja u definiciji a ne u listi inicijalizatora
+            \item[-] Klasni tipovi pozivom odgovarajućeg konstruktora
+            \item[-] Ugrađeni tipovi na osnovu inicijalizatora
+            \item[-] Nizovi objekata po redosledu rastućeg indeksa podrazumevanim konstruktorom
+        \end{itemize}
+        \item Telo konstruktora
+    \end{enumerate}
+    \item Pri uništavanju objekta izveden klase, redosled poziva destruktora je obratan
+\end{itemize}
+\item Konverzija
+\begin{itemize}
+    \item Objekat javno izvedene klase je i objekat osnovne (\textit{Liskov substitution principle})
+\end{itemize}
+\begin{enumerate}
+    \item Pokazivač na objekat izvedene klase može se implicitno konvertovati u pokazivač na objekat osnovne klase
+    \item Pokazivač na objekat osnovne klase mora se eksplicitno konvertovati u pokazivač na objekat izvedene klase
+    \item Isto važi za reference
+    \item Objekat osnovne klase se može inicijalizovati objektom izvedene klase
+    \item Objektu osnovne klase se može dodeliti objekat izvedene klase
+\end{enumerate}
+\begin{itemize}
+    \item Objekat privatno/zaštićeno izvedene klase nije i objekat osnovne klase
+    \item Pokazivač na objekat takve klase se može implicitno konvertovati u pokazivač na objekat osnovne klase samo unutar izvedene klase
+\end{itemize}
+\item Pojam polimorfizma
+\begin{itemize}
+    \item Izvedena klasa može da definiše određene metode na svoj način
+\end{itemize}
+\item Decentralizacija odgovornosti
+\begin{itemize}
+    \item Svaki objekat prepozna kojoj izvedenoj klasi pripada iako možemo da mu se obraćamo kao objektu osnovne klase
+    \item \textbf{Polimorfizam} - svaki objekat izvedene klase izvršava metod onako kako je to definisano u njegovoj izvedenoj klasi, iako mu se pristupa kao objektu osnovne klase
+    \item \textit{Polymorphism = poly} (više) \textit{ + morph} (oblik)
+    \item Isti metod ima više oblika
+    \item Mehanizam je potpuno dinamički - klasa objekta se određuje pri \textbf{izvršavanju} programa
+\end{itemize}
+\item Virtuelni (polimorfni) metodi
+\begin{itemize}
+    \item Virtuelni metodi su metodi osnovne klase koji se u ivzedenim klasama mogu redefinisati
+    \item Metod u izvedenoj klasi nadjačava (\textit{override}) metod osnovne klase
+    \item Polimorfna klasa je ona koja sadrži barem jedan virtuelni metod\\
+    \inlinecode{virtual tip ime(...)}
+    \item Prilikom deklarisanja virtuelnih metoda u izvedenim klasama $\rightarrow$ ne mora \inlinecode{virtual}
+    \item Pozivom preko pokazivača/referece na osnovnu klasu - izvršava se onaj metod koji pripada klasi pokazanog objekta
+\end{itemize}
+\item Redefinisanje virtuelnih metoda
+\begin{itemize}
+    \item Deklaracija virtuelnog metoda u izvedenoj klasi mora \textbf{potpuno} da se slaže sa deklaracijom u osnovnoj klasi (broj + tipovi argumenata + tip rezultata)
+    \item U specijalnom slučaju, ako je tip rezultata referenca/pokazivač na osnovnu kasu, tada, redefinisani metod može da vrati pokazivač/referencu na javno izvedenu klasu iz date osnovne
+    \item Neslaganje potpisa $\rightarrow$ sakrivanje metoda
+    \item Samo razlika u tipu rezultata $\rightarrow$ greška
+    \item Virtuelni metod ne mora da se redefiniše u svakoj izvedenoj klasi - tamo gde nije, naseldi osnovni metod
+\end{itemize}
+\item Pozivanje virtuelnih metoda
+\begin{itemize}
+    \item Mehanizam se aktivira samo ako se objektu pristupa indirektno - preko reference ili pokazivača
+    \begin{lstlisting}
+class Osnovna { public: virtual void f(); };
+class Izvedena : public Osnovna { public: void f(); };
+void g1(Osnovna b) { b.f(); }
+void g2(Osnovna *pb) { pb->f(); }
+void g3(Osnovna &rb) { rb.f(); }
+int main () {
+Izvedena d;
+g1(d);                                  // poziva se Osnovna::f
+g2(&d);                                 // poziva se Izvedena::f
+g3(d);                                  // poziva se Izvedena::f
+Osnovna *pb=new Izvedena; pb->f();      // poziva se Izvedena::f
+Osnovna &rb=d; rb.f();                  // poziva se Izvedena::f
+Osnovna b=d; b.f();                     // poziva se Osnovna::f
+delete pb; pb=&b; pb->f();              // poziva se Osnovna::f
+}
+    \end{lstlisting}
+\end{itemize}
+\item Modifikatori \inlinecode{override} i \inlinecode{final}
+\begin{itemize}
+    \item Implicitna vrednost metoda u izvedenoj klasi nije rObUsNa
+    \item Kao modifikator (iza liste parametara) može da se navede modifikator \inlinecode{override}
+    \item Eksplicitno se iskazuje da metod nadjačava odgovarajući virtuelni metod
+    \item Prevodilac prijavljuje grešku ako nema odgovarajućeg virtuelnog metoda
+    \item Modifikator \inlinecode{final} sprečava nadjačavanje virtuelnih metoda u izvedenim klasama
+    \item Ovi modifiaktori \textbf{nisu} rezervisane reči, niti deo potpisa metoda
+    \item Moguća kombinacija i \inlinecode{override} i \inlinecode{final}
+      % ne znam...
+    \begin{lstlisting}
+class A { public:
+virtual void vm1();
+virtual void vm1(int);
+void m1();
+};
+class B: public A {public:
+void vm1() override;
+void vm1(int) override final;
+void vm1(float) override;           // ERROR - nema A::vm1()
+void vm2() override;                // ERROR - nema A::vm2()
+void m1() override;                 // ERROR - A::m1() nije virtuelna
+void m2() final;                    // ERROR - B::m2() nije virtuelna
+};
+class C: public B { public:
+void vm1(int);                      // ERROR - B::vm1(int) je konacna
+};
+int override=1; int final=2;        // U redu, nije preporucljivo
+    \end{lstlisting}
+\end{itemize}
+\item Dinamičko vezivanje
+\begin{itemize}
+    \item Dinamičko vezivanje - \textit{Dynamic binding} je mehanizam koji obezbeđuje da se metod koji se poziva određuje 
+    \begin{enumerate}
+        \item Po tipu objekta
+        \item Ne po tipu pokazivača ili reference na taj objekat
+    \end{enumerate}
+    \item Odlučivanje koji će se virtuelni metod pozvati se obavlja \textbf{dinamički} - u toku programa
+    \item Po tome se razlikuje u odnosu na preklapanje
+\end{itemize}
+\item Implementacija virtuelnih poziva
+\begin{itemize}
+    \item Za jednostruko nasleđivanje
+    \begin{enumerate}
+        \item Za virtuelne metode nove klase $\rightarrow$ jedinstven kod metoda
+        \item Za svaku polimorfnu klasu postoji tabela pokazivača na virtuelne metode te klase - \textbf{TVF} - Tabela virtuelnih funkcija
+        \end{enumerate}
+        %ubaciti sliku?
+\end{itemize}
+\item Osobine polimorfnih metoda
+\begin{itemize}
+    \item Virtuelni metodi ne mogu biti statički
+    \item Ako nam treba statički metod sa polimorfnim ponašanjem
+    \begin{enumerate}
+        \item Obaj metod treba da poziva nestatički virtuelni metod za neki objekat
+        \item Pokazivač/referenca na taj objekat se prenosi kao argument poziva statičkog metoda
+    \end{enumerate}
+    \item Globalne prijatljeske funkcije \textbf{ne mogu} biti polimorfne (ako je potrebno, mora biti implementirano kao i kod statičkih metoda)
+    \item Virtuelni metodi mogu biti prijatelji drugih klasa
+\end{itemize}
+\item Virtuelni destruktor
+\begin{itemize}
+    \item Konstruktor ne može biti virtuelna funkcija jer se poziva pre nego što se objekat kreira
+    \item Destruktor može biti virtuelna funkcija
+    \item Tek u vreme izvršenja se zna koji destruktor pozivamo
+    \item Kada se uništava dinamički objekat, destruktor osnovne klase se uvek izvršava, ili kao jedini, ili posle destruktora izvedene klase
+    \item Kada neka klasa ima virtuelnu funkciju, verovatno i njen destruktor treba da bude virtuelan
+    \item Unutar destruktora izvedene klase ne treba pozivati destruktor osnovne
+    \begin{lstlisting}
+class OVD { public: virtual ~OVD(); };
+class IVD: public OVD { public: ~IVD(); };
+class OnVD{ public: ~OnVD(); };
+class InVD: public OnVD { public: ~InVD(); };
+void oslobodi (OVD *pb) { delete pb; }
+void oslobodi (OnVD *pb) { delete pb; }
+int main () {
+OVD *pb=new OVD; oslobodi(pb);              // ~OVD()
+IVD *pd=new IVD; oslobodi(pd);              // ~IVD(), ~OVD()
+OnVD *pbn=new OnVD; oslobodi(pbn);          // ~OnVD()
+InVD *pdn=new InVD; oslobodi(pdn);          // ~OnVD()
+}
+    \end{lstlisting}
+\end{itemize}
+\item Nizovi i izvođenje
+\begin{itemize}
+    \item U C++, niz objekata nije objekat
+    \item Niz objekata izvedene klase nije jedna vrsta niza objekata osnovne klase
+    \item Ako se niz objekata izvedene klase prenese funkciji koja očekuje niz osnovne klase, može doći do greške
+    \item Objekti osnovne klase su manj od izvedeni objekata, a funkcija smatra da je dobila niz objekata osnovne klase
+    \begin{lstlisting}
+class Osnovna { public: int bi; };
+class Izvedena : public Osnovna { public: int di; };
+void f(Osnovna *b, int i) { cout<<b[i].bi; }
+int main () {
+Izvedena d[5];
+d[2].bi=77;
+f(d,2); // nece se ispisati 77
+}
+    \end{lstlisting}
+\end{itemize}
+\item Prenos zbirki objekata funkcijama
+\begin{itemize}
+    \item Ako je u igri nasleđivanje pravilo je da se koriste nizovi pokazivača na objekte umesto nizova objekata
+    \item Nije dozvoljena konverzija \inlinecode{Izvedena**} u \inlinecode{Osnovna**}
+\end{itemize}
+\item Apstraktni metodi i klase
+\begin{itemize}
+    \item Apstraktni metod je virtuelni metod koji nije definisan za osnovnu klasu
+    \item Umesto tela stoji \inlinecode{= 0}
+    \item Klasa koja sadrži bar 1 apstraktan metod naziva se apstraktnom klasom - \textit{abstract class}
+    \item Apstraktna kalsa ne može imati objekte, već stiže samo za izvođenje
+    \item Mogu se formirati pokazivači i reference na apstraktnu klasu
+    \item Pokazivači i reference na asptraktnu klasu mogu samo da pokazuju na objekte izvedenih klasa
+    \begin{lstlisting}
+class Osnovna {
+public:
+virtual void cvf () = 0;                // apstraktni metod
+virtual void vf ();                     // virtuelni metod
+};
+class Izvedena : public Osnovna {
+public:
+void cvf();
+};
+int main () {
+    Izvedena izv, *pi=&izv;
+    Osnovna osn;                        // ERROR - Osnovna je apstraktna klasa
+    Osnovna *po=&izv;
+    po->cvf();                          // Poziva se Izvedena::cvf()
+    po->vf();                           // Poziva se Osnovna::vf()
+}
+    \end{lstlisting}
+\end{itemize}
+\item Apstraktni destruktor
+\begin{itemize}
+    \item Kada treba sprečiti stvaranje objekta čiji su svi metodi konkretni, a ne apstraktni deklarišemo apstraktni destruktor
+    \item \boxedimportant[ZAŠTO?]{\item Apstraktni destruktor mora biti definisan i za osnovnu klasu, a definicija mora biti van tela klase}
+    \item Postojanje definicije za destruktor omogućava kreaciju podklasnih objekata
+      
+    \begin{lstlisting}
+class O {
+public:
+virtual ~O() = 0;
+};
+O::~O(){}
+class I:public O {};
+O o; // ERROR
+I i; // U redu
+    \end{lstlisting}
+\end{itemize}
+\item Generalizacija i konkretizacija
+\begin{itemize}
+    \item Apstraktna klasa predstavlja \textbf{generalizaciju} izvedenih klasa
+    \item Klasa koja se izvodi iz apstraktne je \textbf{konkretizacija} apstraktne klase
+    \item Ako se u izvedenoj klasi ne navede definicija nekog apstraktnog metoda iz osnovne klase, i izvedena klasa je apstraktna
+    \item Apstraktna klasa može imati konstruktor - pozivaće se kao konstruktor osnovne klase pri konstrukciji objekata izvedenih konkretnih klasa
+\end{itemize}
+\item Problem konverzije naniže
+\begin{itemize}
+    \item Preko pokazivača/reference na osnovnu klasu nije moguće pristupiti članovima izvedene klase
+    \item Samo ako znamo tačan tip objekta na koji ukazuje pokazivač/referenca možemo eksplicitno konvertovati pokazivač na osnovnu klasu u pokazivač na izvedenu - konverzija naniže - \textit{downcast}
+    \item Ovakva konverzija uopšte nije bezbedna
+    \item Rešenje je da se nakon konverzije naniže proveri njena ispravnost - operator za dinamičku konverziju tipa
+\end{itemize}
+\item Operator dinamičke konverzije\\
+\inlinecode{dynamic\_cast<izvedena\_klasa*>(pokazivac)\\}
+\inlinecode{dynamic\_cast<izvedena\_klasa\&>(referenca)}
+\begin{itemize}
+    \item Konvertuju pokazivač/referencu na polimorfnu osnovnu klasu u pokazivač/referencu na izvedenu klasu
+    \item Ako pokazivač ne pokazuje na objekat izvedene klase u koju se vrši konverzija, ili njene podklase rezultat je \inlinecode{nullptr}
+    \item Ako referenca ne upućuje na na objekat izvedene klase u koju se vrši konverzija, ili njene podklase rezultat je  \inlinecode{bad\_cast} iz \inlinecode{<typeinfo>}
+    
+    \begin{lstlisting}
+class A {public: virtual void vm(){}};      // Polimorfna klasa
+class B: public A{/*...*/};
+class C: public A{/*...*/};
+int main(){
+    A *pa=new B();
+    B *pb=dynamic_cast<B*>(pa);
+    C *pc=dynamic_cast<C*>(pa);             // pc==nullptr
+    B &rb=dynamic_cast<B&>(*pa);
+    C &rc=dynamic_cast<C&>(*pa);            // bad_cast
+}
+    \end{lstlisting}
+\end{itemize}
+\item Dinamičko određivanje tipa
+\begin{itemize}
+    \item C++ omogućava da se u vreme izvršavanja (\textit{runtime}) odredi tip izraza\\
+    \inlinecode{typeid(izraz)}\\
+    \inlinecode{typeid(tip)}
+    \item \inlinecode{izraz}
+    \begin{itemize}
+        \item Proizvoljnog tipa
+        \item Vrednost se \textbf{ne} izračunava
+        \item Ako ukazuje na polimorfnu klasu, rezultat se odnosi na dinamički tip operanda, u suprotnom na statički
+        \item \inlinecode{typeid(*p) p == nullptr} $\rightarrow$ \inlinecode{bad\_typeid}
+    \end{itemize}
+    \item \inlinecode{tip} - proizvoljan tip, rezultat je \inlinecode{const type\_info\&}
+    \item Introspekcija ili refleksija je način da program sazna o sebi
+
+\end{itemize}
+\item Klasa \inlinecode{type\_info}
+\begin{itemize}
+    \item \inlinecode{type\_info} je iz \inlinecode{<typeinfo>}
+    \item Metodi klase \inlinecode{type\_info}
+    \begin{itemize}
+        \item \inlinecode{bool operator==(const type\_info\&) const;}
+        \item \inlinecode{bool operator!=(const type\_info\&) const;}
+        \item \inlinecode{bool before (const type\_info\&) const;} - uređuje dva objekta tipa \inlinecode{type\_info}
+        \item \inlinecode{const char* name() const;} - vraća neko ime - zavisi od kompajlera
+    \end{itemize}
+    \item Nema javnih konstruktora, ne mogu se kreirati podaci ovog tipa, i zato se i ne mogu prenositi podaci ovog tipa po vrednosti
+    \item Operator dodele je takođe privatan
+    \begin{lstlisting}
+class O {};
+// Nepolimorfna klasa
+class I: public O{public: virtual void f(){}};
+class II: public I{};
+int main(){
+O *po=new I;
+I *pi=new II;
+// Izlaz (Borland):
+cout<<(typeid(*po)==typeid(I))<<endl;       // 0
+cout<<(typeid(*pi)==typeid(II))<<endl;      // 1
+cout<<typeid(O).name()<<endl;               // O
+cout<<typeid(*po).name()<<endl;             // O
+cout<<typeid(*pi).name()<<endl;             // II
+cout<<typeid(po).name()<<endl;              // O *
+cout<<typeid(pi).name()<<endl;              // I *
+int m[100][20];
+cout<<typeid(m).name()<<endl;               // int[100][20]
+    \end{lstlisting}
+\end{itemize}
+\item Zloupotreba određivanja tipa
+\begin{itemize}
+    \item Poenta objektno-orijantisanih jezika je u decentralizaciji odgovornosti
+    \item Kada se odredi tip objekta on se može porediti sa klasama
+    \item Polimorfizam se zamenjuje selekcijom i program ponovo postaje sa centralnom odgovornošću
+    \begin{lstlisting}
+// Ohrabruje ovakvu vrstu pisanja, preuzeto sa StackOverflow
+PolymorphicType *pType = ...;
+if(typeid(*pType) == typeid(Derived1))
+  pType->Func1();
+else if(typeid(*pType) == typeid(Derived2))
+  pType->Func2();
+else if(typeid(*pType) == typeid(Derived3))
+  pType->Func3();
+    \end{lstlisting}
+\end{itemize}
+\item Višestruko nasleđivanje
+\begin{itemize}
+    \item Klasa direktno nasleđuje osobine više osnovnih klasa, a roditeljske nisu jedna drugoj vrsta - \textit{multiple inheritance}
+    \item Klasa se deklariše kao naslednik više klasa tako što se u zaglavlju navode osnovne klase - ispred svake osnovne treba da stoji \inlinecode{public}
     
 \end{itemize}
+\item Konstrukcija i destrukcija
+\begin{itemize}
+    \item Pravila o nasleđenim članovima važe
+    \item Konstruktori svih osnovnih klasa se izvršavaju pre
+    \begin{enumerate}
+        \item Konstruktora članova izvedene klase
+        \item Konstruktora izvedene klase
+    \end{enumerate}
+    \item Konstruktori osnovnih klasa se pozivaju po redesledu deklarisanja
+    \item Destruktori osnovnih klasa se izvršavaju posle
+    \begin{enumerate}
+        \item Destruktora izvedene klase
+        \item Destruktora članova izvedene klase
+    \end{enumerate}
+    \item Destruktori osnovnih klasa se pozivaju obrnutim redom
+\end{itemize}
+\item Problem dijamant strukture
+\begin{itemize}
+    \item Kada su osnovne klase, pri višestrukom izvođenju, izvedene iz iste roditeljske klase nastaje problem dijamant strukture
+    \begin{lstlisting}
+class B {int i; /*...*/};
+class X : public B {/*...*/};
+class Y : public B {/*...*/};
+class Z : public X, public Y {/*...*/};  
+    \end{lstlisting}
+\item Objekat nove klase će imati dva skupa članova klase B - razlikujemo ih pomoću \inlinecode{z.X::i} ili \inlinecode{z.Y::i}
+\item Konstruktor osnovne kase B se izvršava dva puta
+\end{itemize}
+\item Virtuelne osnovne klase
+\begin{itemize}
+    \item Ako nisu potrebna dva skupa članova, pri izvođenju treba deklarisati klasu B kao virtuelnu osnovnu klasu
+\begin{lstlisting}
+class B {int i; /*...*/};
+class X : virtual public B {/*...*/};
+class Y : virtual public B {/*...*/};
+class Z : public X, public Y {/*...*/};
+\end{lstlisting}
+\item Sada klasa Z nasleđuje samo jedan skup klase B i nema dvoznačnosti
+\item Konstruktor klase B se poziva samo jednom
+\item Klasa B mora biti virtuelna osnovna i za X i za Y, ako je samo jedna virtuelna ostaje dva skupa članova sa dva konstruktora
+\item Redefinicija metod \inlinecode{m()} definisanog u klasi B
+\begin{itemize}
+    \item U klasi X ili Y - za \inlinecode{z.m()} se poziva redifinicija \checkmark
+    \item I u klasi X i u klasi Y - dvoznačnost X
+\end{itemize}
+\end{itemize}
+\item Redosled konstrukcije
+\begin{itemize}
+    \item Konstruktori virtuelnih osnovnih klasa se pozivaju pre konstruktora nevirtuelnih osnovnih klasa
+    \item Precizan redosled
+    \begin{enumerate}
+        \item Konstruktori virtuelnih osnovnih klasa prvo po dubini grafa do korena, a zatim sleva-udesno na istom nivou
+        \item Konstruktori nevirtuelnih osnovnih klasa
+        \item Konstruktori atributa
+        \item Konstriktor izvedene klase
+    \end{enumerate}
+    \item Konstruktori virtulenih osnovnih klasa se pozivaju samo jednom
+     
+    \newpage
+\begin{multicols}{2}
+\begin{lstlisting}
+#include <iostream.h>
+class B {
+public: B(){cout<<" B";}
+};
+class X : virtual public B {
+public: X(){cout<<" X";}
+};
+class Y : virtual public B {
+public: Y(){cout<<" Y";}
+};
+class Z : public X, public Y {
+public: Z(){cout<<" Z"<<endl;}
+};
+int main(){Z z;}
+\end{lstlisting}
+\columnbreak
+\begin{lstlisting}
+// Originalni redosled:           B X Y Z
+// Da je stajalo (jedna po jedna zamena):
+class X: public B {...      //  B B X Y Z
+class Y: public B {...      //  B X B Y Z
+class Z: public X,
+virtual public Y {...       //    B Y X Z
+class Z: virtual public X,
+virtual public Y {...       //    B X Y Z
+\end{lstlisting}
+\end{multicols}
+\end{itemize}
 \end{xitemize}
+\section{ Izuzeci (\textit{Exceptions})}
+\begin{xitemize}
+\item Pojam izuzetaka
+\begin{itemize}
+    \item Izuzeci (\textit{exceptions}) su događaji koje treba posebno obraditi van toka programa
+    \item Kod jezika koje ne podržavaju obradu izuzetaka, dolazi do sledećih problema
+    \begin{itemize}
+        \item[\textperiodcentered] Problem migracije udesno - Posle izvršenja dela programa u kojem može doći do greške se testira status. OK status ide u jednu granu \inlinecode{if}, a obrada greške u drugu
+        \item[\textperiodcentered] Problem propagacije unazad - U lancu poziva funkcija, ako greška treba da se propagira nazad ka prethoodnom nivou, svaki nivo treba da testira da li je došlo do greške, i ako greška ne može da se obradi, funkcija u \inlinecode{return} mora da vrati kod greške
+    \end{itemize}
+    % Ilustracije problema?
+\end{itemize}
+\item Izuzeci u jeziku C++
+\begin{itemize}
+    \item Na mestu otkrivanja izuzetne situacije se baca izuzetak (operator \inlinecode{throw}) i dalja regularna obrada tekućeg bloka se trajno prekida
+    \item Izuzetak može biti objekat klase ili nekog drugog tipa
+    \item Obrada iuzetaka se nastavlja u posebnom bloku (\inlinecode{catch}) - rukovaocu obradom izuzetka (\textit{handler}) se dostavlja izuzetak kao argument
+    \item Za svaki tip izuzetka postoji zaseban \textit{handler}
+    \item Posle uspešne obrade izuzetka, obrada se nastavlja regularno
+    \item Ako ne postoji odgovarajući rukovalac izuzetak se automatski propagira unazad
+\end{itemize}
+\item Otkrivanje i obrada izuzetaka
+\begin{itemize}
+    \item Obrada izuzetaka je vezana za blok naredbe \inlinecode{try}
+    \item Dopuniti sintaksnim dijagramima
+\end{itemize}
+\item Definicija rukovaoca i tok obrade
+% 
+\begin{itemize}
+    \item Definicija rukovaoca liči na definiciju funkcije sa tačno jednim parametrom
+    \item Završiti sa sintaksnim dijagramom i njegovim objašnjenjem
+    \item Ovde samo objašnjava kako se koristi try/catch
+    
+    \begin{lstlisting}
+try {
+...
+radi();                     // Funkcija mozda baca izuzetak
+...
+} catch(const char *pz){    // Obrada izuzetka tipa znakovnog niza
+} catch(const int i){       // Obrada izuzetka celobrojnog tipa
+} catch(...){               // Obrada izuzetka proizvoljnog tipa    
+                            // koji nije jedan od gornjih
+}
+    \end{lstlisting}
+\end{itemize}
+\item Izazivanje izuzetaka
+\begin{itemize}
+    \item Prijavljivanje ili bacanje izuzetaka se vrši naredbom \inlinecode{throw izraz;} gde izraz svojim tipom određuje koji handler će biti aktivan, dok se vrednost izraza izračunava i prosleđuje handleru kao argument
+    \item Izuzetak se može izazvati iz bloka ili bilo koje funkcije direktno ili indirektno pozvane iz bloka naredbe \inlinecode{try}
+    \item Funkcije iz kojih se izaziva izuzetak mogu biti članice klasa, operatori, konstruktori a i destruktori
+    \item Za (dinamički) ugnežđene naredbe \inlinecode{try} - ugnežđeni rukovalac može da izazove izuzetak, koji se prosleđuje rukovaocu spoljašnjeg \inlinecode{try}-a
+    \item Takođe, izuzetak može da se izazove i pomoću naredbe \inlinecode{trow;} bez izraza, i takav izuzetak ima tip rukovaoca u kojem je izazvan
+\end{itemize}
+\item Specifikacija izuzetaka funkcije
+\begin{itemize}
+    \item U deklaraciji ili definiciji funkcija može da se navede spisak tipova izuzetaka koje funkcija izaziva\\
+    \inlinecode{throw(niz\_identifikatora)} - iza liste argumenata
+    \item Ako se stavi \inlinecode{throw()} klauzula kad funnkcija izazove izuzetak tipa koji nije nabrojan $\rightarrow$ greška
+    \item Ako se izostavi \inlinecode{throw()} klauzula funkcija sme da prijavi izuzetak proizvoljnog tipa
+    \item Virtuelna metoda u izvedenoj klasi ne sme da proširi listu izuzetaka iz  \inlinecode{throw()} klauzule, ali sme da ih suzi
+    \item Standard C++11 ne preporučuje korišćenje \inlinecode{throw(niz\_identifikatora)}, već samo vraćanje informacije da li funkcija baca ili ne baca izuzetke
+\begin{lstlisting}
+void radi(...)throw(const char *, int){
+if(...) throw "Izuzetak!";
+if(...) throw 100;
+if(...) throw Tacka(0,0);   // ERROR nije naveden tip izuzetka Tacka
+}
+\end{lstlisting}
+\end{itemize} 
+\item Modifikator i operator \inlinecode{noexcept}
+\begin{itemize}
+    \item Modifikator
+    \begin{itemize}
+        \item[\textperiodcentered]\inlinecode{throw(niz\_identifikatora)}iza liste parametara, izvršava se u toku prevođenja i vrednost \inlinecode{true} označava da funkcije ne baca izuzetke
+    \end{itemize}
+    \item Operator
+    \begin{itemize}
+        \item \inlinecode{throw(niz\_identifikatora)}, gde je rezultat izraza logičkog tipa i izraz može biti proizvoljnog tipa (čak i \inlinecode{void})
+        \item Izraz se ne izračunava, samo proverava u toku izvođenja, proverava se da li bi u slučaju izvršenja izraza moglo doći do izuzetka
+        \item Može da se koristi i u gorenavedenom modifikatoru
+    \end{itemize}
+    \begin{lstlisting}
+void f() noexcept {}                    // ne baca
+int g() noexcept(false){return 0;}      // moze da baca
+double h() {return 0.0;}                // moze da baca
+int i() throw(){return 0;}              // ne baca
+void j() throw (int, double){}
+                                        // moze da baca int i double
+bool p=noexcept(f());                   // true
+bool q=noexcept(g());                   // false
+bool r=noexcept(h());                   // false
+bool s=noexcept(i());                   // true
+bool t=noexcept(j());                   // false
+bool v=noexcept(new int);               // false        
+    \end{lstlisting}
+\end{itemize}
+\item Prihvatanje izuzetaka - pravila
+\begin{itemize}
+    \item Rukovalac tipa R može da primi izuzetak tipa I ako
+    \begin{enumerate}
+        \item R i I su isti tip
+        \item R je javna osnovna klasa za izvedenu klasu I
+        \item R i I su pokazivački/refrentni tipovi i I standardno može da se konvertuje u R
+    \end{enumerate}‚
+    \item Prilikom navođenja rukovaoca treba se držati sledećih pravila
+    \begin{enumerate}
+        \item Rukovaoce tipa izvedenog iz neke osnovne klase treba stavljati ispred rukovaoca tipa te osnovne klase
+        \item Univerzalni rukovalac na poslednje mesto
+    \end{enumerate}
+\end{itemize}
+\item Prosleđivanje objekta izuzetka
+\begin{itemize}
+    \item Na mestu izazivanja izuzetka formira se objekat koji se prosleđuje rukovaocu 
+    \item Objekat koji se prosleđuje je po pravilu kopija objekta rezultata izraza operatora \inlinecode{throw}
+    \item Prevodilac može da odluči da ne napravi kopiju - tada se za objekaz uzima rezultat izraza
+    \item To može biti i bezimeni privremeni objekat ili lokalni automatski objekat, ali svakako mora da ima kopirajući i/ili premeštajući konstruktor i destruktor
+    \item Objekat se prosleđuje i obrađuje u najboliže, prvom odgovarajućem rukovaocu
+    \item Ako se ne pronađe odgovarajući rukovalac objekat se prosleđuje prethodnom nivou \inlinecode{try}
+\end{itemize}
+\item Obrada izuzetka u ugnežđenim \inlinecode{try}
+\begin{itemize}
+    \item Ako su \inlinecode{try} naredbe ugnežđene i ako se pronađe rukovalac tekuće naredbe - on obrađuje izuzetak, i ako se ne baci dalje, nastavlja se naredbom koja se nalazi posle poslednjeg \inlinecode{catch} bloka
+    \item Ako se ne pronađe odgovarajući rukovalac - izuzetak se prosleđuje rukovaocu prethodnog nivoa naredbe \inlinecode{try}, a ni jedna naredba posle \inlinecode{catch} se \textbf{neće} izvršiti
+    \item U slučaju da se izuzetak baci iz \inlinecode{catch} bloka naredbom \inlinecode{throw;}, i on se prosleđuje rukovaocu prethodnog nivoa, a objekat izuzetka ostaje živ i u \inlinecode{catch} bloku tog \inlinecode{try}
+\end{itemize}
+\item Uništavanje lokalnih objekata
+\begin{itemize}
+    \item Predaja kontrole rukovaocu podrazumeva napuštanje bloak gde se dogodio izuzetak
+    \item Uništavaju se svi lokalni objekti tog i svih ugnežđenih blokova
+    \item Uništava se redosledom obrnutim od stvaranja
+    \item Kod izuzetaka bačenih iz konstruktora uništavaju se stvoreni klasni atributi i nasleđeni podobjekti
+    \item Nije dobro da rezultat izraza \inlinecode{throw} pokazuje/upućuje na lokalni objekat, jer će on biti uništen pre nego što dođe do rukovaoca
+\end{itemize}
+\item Funkcijska naredba \inlinecode{try}
+\begin{itemize}
+    \item Telo \inlinecode{try} bloka se poklapa sa telom funkcije
+    \item Modifikatori metode (npr \inlinecode{const}), i \inlinecode{throw} klauzula idu ispred try
+    \item U handlerima mogu da se koriste parametri funkcije a ne mogu da se koriste lokalne promenljive
+    \item Ako funkcije nije \inlinecode{void}, mora da izvrši return ako ne baci izuzetak
+    \begin{lstlisting}
+tip fun(parametri) try { /* telo funkcije */ }
+catch (parametar1) { /* telo rukovaoca 1 */ }
+catch (parametar2) { /* telo rukovaoca 2 */ }
+//--------------------------------------------------------------
+int f(int x) throw(double) try {
+int y=0;
+if (...) throw 1;             // baca se i obradjuje
+if (...) throw 2.0;           // baca se i propagira dalje
+...
+return x+y;                 // regularan rezultat funkcije
+} catch (int g) {
+int a=x;                    // u redu
+int b=y;                    // ERROR
+return -1;                  // rezultat u izuzetnoj situaciji
+            
+    \end{lstlisting}
+\end{itemize}
+\item Funkcijski \inlinecode{try} u konstruktoru
+\begin{itemize}
+    \item Omogućava hvatanje izuzetaka koji se bacaju iz
+    \begin{enumerate}
+        \item Inicijalizatora atributa primitivnog tipa
+        \item Konstruktora atributa klasnog tipa
+        \item Konstruktora osnovnih klasa
+    \end{enumerate}
+    \item Lista inicijalizatora u definiciji konstruktora se piše iza \inlinecode{try}
+    \item Ako se iz rukovaoca pristupa atributima ili nasleđenom podobjektu posledice su nepredvidive jer neki još nisu inicijalizovani, a klasni koji su već bili konstruisani su uništeni prilikom bacanja izuzetka
+    \begin{lstlisting}
+class A {
+public:
+A(int x) {... if (...) throw 'x';...}
+A(char x) {... if (...) throw 2;...}
+}
+class B {
+    A a1=A(3);
+    A a2;
+public:
+    B() try : a2('a'){                  // Izuzetak tipa int
+    ... 
+    if(...) throw 4.0;                  // Izuzetak tipa double
+    } catch (double g) {                // Rukovalac za tip double
+    A a3(a1);                           // ERROR - a1 unisten
+    } catch (char g) {                  // Rukovalac za tip char
+    ...
+    }                                   // Nije obradjen tip int
+}
+    \end{lstlisting}
+\end{itemize}
+\item Neprihvaćeni izuzeci
+\begin{itemize}
+    \item Ako se za neki izuzetak ne pronađe rukovalac - izvršava se sistemska funkcija \\
+    \inlinecode{void terminate();}
+    \item Podrazumeva se da ova funkcija poziva funkciju \inlinecode{abort()} - ona vraća kontrolu operativnom sistemu
+    \item Ovo se može promeniti pomoću funkcije \inlinecode{set\_terminate()}
+    \begin{itemize}
+        \item Dostavlja se pokazivač na funkciju koju \inlinecode{terminate()} poziva umesto \inlinecode{abort()}
+        \item Pokazana funkcija mora biti bez argumenata i rezultata \inlinecode{void}
+        \item Vrednost funkcije \inlinecode{set\_terminate()} je pokazivač na staru funkciju koja je bila pozvana iz \inlinecode{terminate()}
+    \end{itemize}
+\end{itemize}
+\item Zamena za \inlinecode{abort()}
+\begin{itemize}
+    \item Tip korisničke funkcije koja zamenjuje  \inlinecode{abort()}\\
+    \inlinecode{typedef void (*PF) ();}
+    \item Prototip funkcije \inlinecode{set\_terminate()}\\
+    \inlinecode{PF set\_terminate(PF pf);}
+    \item Iz korisničke funkcije \inlinecode{(*PF)} treba pozvati \\
+    \inlinecode{exit(int), terminate()} ili \inlinecode{ abort()}
+    \item Pokušaj povratka sa \inlinecode{return} iz korisničke funkcije dovešće do nasilnog prekida programa sa \inlinecode{abort()} - funkcija ne sme išta da vraća
+\end{itemize}
+\item Neočekivani izuzeci
+\begin{itemize}
+    \item Ako se u nekoj funkciji izazove neočekivani izuzetak (nije na spisku izuzetaka) izvršava se funkcija \\
+    \inlinecode{void unexpected();}
+    \item Podrazumeva se da ova funkcija pozove funkciju \inlinecode{terminate()}
+    \item Ovo ponašanje se može promeniti pomoću \inlinecode{set\_unexpected()}
+    \begin{itemize}
+        \item Dstavlja joj se pokazivač na funkciju koju treba da pozove umesto \inlinecode{terminate()}
+        \item Pokazana funkcija mora biti bez argumenata i rezultata (\inlinecode{void})
+        \item Vrednost funkcije \inlinecode{set\_unexpected()} je pokazivač na staru funkciju koja je bila pozvana iz \inlinecode{unexpected()}
+    \end{itemize}
+\end{itemize}
+\item Zamena za \inlinecode{terminate()}
+\begin{itemize}
+    \item Tip korisničke funkcije koja zamenjuje  \inlinecode{terminate()}\\
+    \inlinecode{typedef void (*PF) ();}
+    \item Prototip funkcije \inlinecode{set\_terminate()}\\
+    \inlinecode{PF set\_terminate(PF pf);}
+    \item Iz korisničke funkcije \inlinecode{(*PF)} treba pozvati \\
+    \inlinecode{exit(int), terminate()} ili \inlinecode{ abort()} ili baciti izuzetak sa liste dozvoljenih ili baciti \inlinecode{bad\_exception}
+    \item Pokušaj povratka sa \inlinecode{return} iz korisničke funkcije dovešće do nasilnog prekida programa sa \inlinecode{abort()} - funkcija ne sme išta da vraća
+\end{itemize}
+\item Standardni izuzeci
+\begin{itemize}
+    \item Klasa \inlinecode{exception} u zaglavlju \inlinecode{<exception>} je predak svih standardnih izuzetaka
+    \item Metode standardnih klasa i neki operatori prijavljuju izuzetke klasa izvedenih iz \inlinecode{exception}, a preporučuje se i da se korisnički izuzeci izvode odatle
+    \item Klasa omogućava da se pojedini tipovi izuzetaka mogu obrađivati
+    \begin{enumerate}
+        \item Pojedinačno
+        \item U srodnim grupama
+        \item Svi zajedno (ali ne kao ...)
+    \end{enumerate}
+\end{itemize}
+\item Definicija klase \inlinecode{exception}
+\begin{itemize}
+    \item \inlinecode{what()} vraća pokazivač na tekstualni opis izuzetka (standard ne propisuje tekst poruka)
+    \item Ni jedna metoda ne sme da prijavi izuzetak, to se obezbeđuje sa \inlinecode{noexcept}
+\begin{lstlisting}
+class exception {
+public:
+    exception() noexcept;
+    exception(const exception &) noexcept;
+    exception& operator=(const exception &) noexcept;
+    virtual ~exception() noexcept;
+    virtual const char* what() const noexcept;
+};
+\end{lstlisting}
+\end{itemize}
 
+\end{xitemize}
 \end{document}
