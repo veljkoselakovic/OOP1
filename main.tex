@@ -435,7 +435,7 @@ Nebitno da li su slovne ili sam nesto pogresno lupio. Mozete i sami izmeniti na 
         \item Privremeni objekti se kreiraju pri izračunavanju izraza
         \begin{enumerate}
             \item \textbf{Životni vek} - kratak i nedefinisan
-            \item Odlaganje međurezultata i privremeno smeštanja vraćenih vrednosti funkcije
+            \item Odlaganje međurezultata i privremeno smeštanje vraćenih vrednosti funkcije
             \item Najčešće se uništavaju čim nisu potrebni
         \end{enumerate}
     \end{itemize}
@@ -471,7 +471,7 @@ Nebitno da li su slovne ili sam nesto pogresno lupio. Mozete i sami izmeniti na 
 \end{itemize}
 \item Vrste konverzija tipova
 \begin{itemize}
-    \item \textbf{Standarna konverzija} - ugrađeno u jezik\\
+    \item \textbf{Standardna konverzija} - ugrađeno u jezik\\
     npr. \inlinecode int $\rightarrow $ \inlinecode float, \inlinecode char $\rightarrow$ \inlinecode int
     \item \textbf{Korisnička konverzija} - definiše programer
     \item Pored toga, konverzija može biti
@@ -484,7 +484,7 @@ Nebitno da li su slovne ili sam nesto pogresno lupio. Mozete i sami izmeniti na 
     \item C++ uvodi 4 specifčna \textit{cast} operatora
     \item Postoji i konverzioni konstruktor
 \end{itemize}
-\item Priduživanje imena tipu
+\item Pridruživanje imena tipu
 \begin{multicols}{2}
 
 \begin{itemize}
@@ -518,7 +518,7 @@ decltype(a++) c = a; // c == a == 1
 \item Automatsko određivanje tipa
 \begin{itemize}
     \item \inlinecode{auto} ključna reč određuje tip na osnovu inicijalne vrednost 
-    \inlinecode U C, \inlinecode{auto} označava automatsku lokalnu promenljivu, i ne piše se
+    U C, \inlinecode{auto} označava automatsku lokalnu promenljivu, i ne piše se
     
     \begin{lstlisting}
 auto int a = 10; // Samo u C
@@ -549,7 +549,7 @@ auto b = g() // OK
     \item Izvedeni tip\\
     \inlinecode{const tip ime = vrednost;}
     \item Mora da se inicijalizuje pri definisanju
-    \item Izraz ne morada bude konstantan
+    \item Izraz ne mora da bude konstantan
     \item \boxedimportant[BITNO]{Konstante inicijalizovane \textbf{konstantnim} izrazom
     (\textit{simboličke} ili \textit{kompilacione} konstante) mogu da se koriste u izrazima koji moraju biti konstantni (računaju se \textbf{u toku} prevođenja)\\
     npr. Dimenzija statičkog niza}
@@ -725,7 +725,7 @@ int main(){
     \item Ako nema mesta \inlinecode {bad\_alloc} exception\\
     U nestandardizovanom C++ vraća se \inlinecode {nullptr}
     \item Vraća pokazivač na kreirani objekat\\
-    \inlinecode{T *t = new (nothrow)T;} $\longleftarrow$ Ignorisanje exceptiona, vraća \inlinecode{nullptr} ako ne uspe
+    \inlinecode{T *t = new (nothrow)T;} $\longleftarrow$ Ignorisanje \textit{exception}-a, vraća \inlinecode{nullptr} ako ne uspe
     \item Stavlja na \textit{heap}
 \end{itemize}
 \item Uništavanje dinamičkih objekata
@@ -745,7 +745,7 @@ int main(){
     \item Inicijalizacija
     \begin{enumerate}
         \item Podrazumevani konstruktor ILI
-        \item Generisain konstruktor
+        \item Generisani konstruktor
     \end{enumerate}
     \inlinecode{delete [] pt;}
     \item Redosled konstrukcije po rastućem indeksu
